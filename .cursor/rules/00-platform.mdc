@@ -1,48 +1,94 @@
-# Nexus Platform - Cursor Rules
+# 🚀 Nexus Platform - Modulare SaaS Architektur
 
-## Projekt-Übersicht
+*Willkommen! Dies ist eine modulare SaaS-Plattform mit Symfony Bundles und React Packages.*
 
-Dies ist eine modulare SaaS-Plattform mit 3 Schichten:
+## 🎯 Die Architektur
 
-1. **Foundation** - Core (Auth, Tenant, Billing, Notifications)
-2. **Modules** - Wiederverwendbare Features (Survey, Chat, AI Buddy, HR)
-3. **Apps** - Business-Logik (EasyBGM)
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  LAYER 3: PRODUCTS (Deployable Apps)                                │
+│  ┌──────────────────────┐  ┌──────────────────────┐                │
+│  │  EasyBGM             │  │  Future Product X    │                │
+│  │  (Backend+Frontend)  │  │                      │                │
+│  └──────────────────────┘  └──────────────────────┘                │
+├─────────────────────────────────────────────────────────────────────┤
+│  LAYER 2: REUSABLE MODULES                                          │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐               │
+│  │  Survey  │ │   Chat   │ │ AI Buddy │ │    HR    │               │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘               │
+├─────────────────────────────────────────────────────────────────────┤
+│  LAYER 1: PLATFORM FOUNDATION                                       │
+│  Auth │ Tenant │ Billing │ Notifications │ Settings │ Encryption   │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
-## Architektur-Regeln
+## 🔗 Dependency Rules (WICHTIG!)
 
-### Dependency Rules
-- Layer 3 (Apps) → darf Layer 2 + Layer 1 nutzen
-- Layer 2 (Modules) → darf NUR Layer 1 nutzen
-- Layer 1 (Foundation) → keine Abhängigkeiten nach oben
-- Module dürfen NICHT voneinander abhängen
+```
+✅ ERLAUBT                         ❌ VERBOTEN
+────────────────────────────────   ────────────────────────────────
+Product → App → Module → Found.   Module → Module (horizontal)
+App → Module                       Foundation → Module (nach oben)
+App → Foundation                   Module → App (nach oben)
+Module → Foundation                Foundation → App (nach oben)
+```
 
-### Symfony Bundle Pattern
-- Jedes Modul ist ein eigenständiges Symfony Bundle
-- Eigene Entities, Services, Controller pro Bundle
-- Tests sind Teil des Bundles
+**Goldene Regel:** Immer nur nach UNTEN abhängen, NIE nach oben oder zur Seite!
 
-### Naming Convention
-- Composer: `the-nexus-collective/till-kubelke-{type}-{name}`
-- Namespace: `TillKubelke\{PlatformFoundation|ModuleSurvey|AppEasyBgm}\`
-- NPM: `@the-nexus-collective/till-kubelke-{name}-ui`
+## 📁 Repository-Struktur
 
-## Code Style
+| Repository | Layer | Namespace |
+|------------|-------|-----------|
+| `till-kubelke-platform-foundation` | 1 | `TillKubelke\PlatformFoundation\` |
+| `till-kubelke-module-survey` | 2 | `TillKubelke\ModuleSurvey\` |
+| `till-kubelke-module-chat` | 2 | `TillKubelke\ModuleChat\` |
+| `till-kubelke-module-ai-buddy` | 2 | `TillKubelke\ModuleAiBuddy\` |
+| `till-kubelke-module-hr-integration` | 2 | `TillKubelke\ModuleHrIntegration\` |
+| `till-kubelke-app-easybgm` | 3 | `TillKubelke\AppEasyBgm\` |
+| `till-kubelke-platform-ui` | 1 | `@till-kubelke/platform-ui` |
 
-### PHP/Symfony
-- PHP 8.2+, Symfony 7.3
-- Thin Controllers, Fat Services
-- DTOs für API Input/Output
-- `#[MapRequestPayload]` für Validation
+## 🐘 Bundle-Konventionen
 
-### React/TypeScript
-- React 19, Vite, MUI v7
-- Custom Hooks für Business Logic
-- SWR für Data Fetching
+### Namespace-Pattern
+```php
+// Layer 1
+namespace TillKubelke\PlatformFoundation\Auth\Controller;
+namespace TillKubelke\PlatformFoundation\Tenant\Entity;
 
-## Quelle
+// Layer 2
+namespace TillKubelke\ModuleSurvey\Controller;
+namespace TillKubelke\ModuleChat\Entity;
 
-Migriert aus: `/Users/till.kubelkesportalliance.com/Develop/bgm-portal/`
+// Layer 3
+namespace TillKubelke\AppEasyBgm\Controller;
+```
 
-Siehe auch:
-- ARCHITECTURE.md
-- IMPLEMENTATION_PLAN.md
+### Bundle-Ordnerstruktur
+```
+till-kubelke-module-xxx/
+├── composer.json
+├── src/
+│   ├── XxxModuleBundle.php
+│   ├── Controller/
+│   ├── Entity/
+│   ├── Service/
+│   └── Repository/
+├── Resources/
+│   └── config/
+│       └── services.yaml
+└── Tests/
+```
+
+## 🚀 Development Commands
+
+```bash
+./run.sh start      # Alles starten
+./run.sh stop       # Alles stoppen
+./run.sh test       # Tests ausführen
+./run.sh status     # Git Status aller Repos
+```
+
+## 📊 Migrations-Status
+
+- Backend: 119 PHP files in 6 Bundles (88% migriert)
+- Frontend: 41 TS files im platform-ui Package
