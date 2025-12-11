@@ -1,0 +1,48 @@
+# Nexus Platform - Cursor Rules
+
+## Projekt-Übersicht
+
+Dies ist eine modulare SaaS-Plattform mit 3 Schichten:
+
+1. **Foundation** - Core (Auth, Tenant, Billing, Notifications)
+2. **Modules** - Wiederverwendbare Features (Survey, Chat, AI Buddy, HR)
+3. **Apps** - Business-Logik (EasyBGM)
+
+## Architektur-Regeln
+
+### Dependency Rules
+- Layer 3 (Apps) → darf Layer 2 + Layer 1 nutzen
+- Layer 2 (Modules) → darf NUR Layer 1 nutzen
+- Layer 1 (Foundation) → keine Abhängigkeiten nach oben
+- Module dürfen NICHT voneinander abhängen
+
+### Symfony Bundle Pattern
+- Jedes Modul ist ein eigenständiges Symfony Bundle
+- Eigene Entities, Services, Controller pro Bundle
+- Tests sind Teil des Bundles
+
+### Naming Convention
+- Composer: `the-nexus-collective/till-kubelke-{type}-{name}`
+- Namespace: `TillKubelke\{PlatformFoundation|ModuleSurvey|AppEasyBgm}\`
+- NPM: `@the-nexus-collective/till-kubelke-{name}-ui`
+
+## Code Style
+
+### PHP/Symfony
+- PHP 8.2+, Symfony 7.3
+- Thin Controllers, Fat Services
+- DTOs für API Input/Output
+- `#[MapRequestPayload]` für Validation
+
+### React/TypeScript
+- React 19, Vite, MUI v7
+- Custom Hooks für Business Logic
+- SWR für Data Fetching
+
+## Quelle
+
+Migriert aus: `/Users/till.kubelkesportalliance.com/Develop/bgm-portal/`
+
+Siehe auch:
+- ARCHITECTURE.md
+- IMPLEMENTATION_PLAN.md
