@@ -1,0 +1,26 @@
+# Ignore all submodule directories (they have their own git repositories)
+till-kubelke-app-easybgm/
+till-kubelke-module-ai-buddy/
+till-kubelke-module-chat/
+till-kubelke-module-hr-integration/
+till-kubelke-module-survey/
+till-kubelke-platform-foundation/
+till-kubelke-platform-ui/
+till-kubelke-product-easybgm-backend/
+till-kubelke-product-easybgm-frontend/
+
+# Ignore temporary files
+*.pid
+.cursor/rules/
+.DS_Store
+
+# Keep root documentation and scripts
+!README.md
+!ARCHITECTURE.md
+!GOVERNANCE.md
+!IMPLEMENTATION_PLAN.md
+!AI_ACCESS_PROMPTS.md
+!NPM_REGISTRY_SETUP.md
+!PACKAGIST_SETUP.md
+!*.sh
+
