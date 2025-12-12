@@ -53,6 +53,13 @@ EasyBGM ist das erste Produkt, aber die Architektur ermöglicht beliebige weiter
 - Layer 1 (Foundation) → keine Abhängigkeiten nach oben
 - Module dürfen NICHT voneinander abhängen
 
+## Governance Model
+
+Siehe [GOVERNANCE.md](./GOVERNANCE.md) für das vollständige bidirektionale Governance-Modell:
+- **Top-Down (Use):** Products konsumieren Bundles
+- **Bottom-Up (Elevate):** Code wird nach oben refactored wenn Patterns entstehen
+- **Three-Strike Rule:** 1x Product → 2x App → 3x Module/Foundation
+
 ## Quelle
 
 Extrahiert aus: /Users/till.kubelkesportalliance.com/Develop/bgm-portal/

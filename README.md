@@ -75,6 +75,20 @@ App → Foundation                 Module → App
 Module → Foundation              Foundation → App
 ```
 
+## 🏛️ Governance Model
+
+Wir folgen einem **bidirektionalen Inner-Source-Modell** (inspiriert von Design System Governance):
+
+| Layer | Governance | Process |
+|-------|------------|---------|
+| Products | Project Team | Keine Genehmigung nötig |
+| Apps + Modules | Guild | Team-Konsensus |
+| Foundation | Architecture Team | RFC erforderlich |
+
+**Three-Strike Rule:** 1x im Product bauen → 2x App erwägen → 3x Module/Foundation evaluieren
+
+📖 Siehe [GOVERNANCE.md](./GOVERNANCE.md) für das vollständige Modell.
+
 ## 🛠️ Tech Stack
 
 **Backend:** Symfony 7.3, API Platform, Doctrine ORM, PostgreSQL
