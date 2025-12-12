@@ -1,11 +1,11 @@
-# SaaS Platform Architektur - The Nexus Collective
+# SaaS Platform Architecture - The Nexus Collective
 
 ## Vision
 
-Eine modulare SaaS-Plattform unter `github.com/The-Nexus-Collective/` mit dem Prefix `till-kubelke-`. 
-EasyBGM ist das erste Produkt, aber die Architektur ermöglicht beliebige weitere Business-Apps.
+A modular SaaS platform under `github.com/The-Nexus-Collective/` with the prefix `till-kubelke-`. 
+EasyBGM is the first product, but the architecture enables any number of additional business apps.
 
-## 3-Schichten-Architektur
+## 3-Layer Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -25,7 +25,7 @@ EasyBGM ist das erste Produkt, aber die Architektur ermöglicht beliebige weiter
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## GitHub Repository-Struktur (15 Repos)
+## GitHub Repository Structure (15 Repos)
 
 ### Layer 1: Platform Foundation
 - till-kubelke-platform-foundation (Symfony Bundle)
@@ -48,20 +48,20 @@ EasyBGM ist das erste Produkt, aber die Architektur ermöglicht beliebige weiter
 
 ## Dependency Rules
 
-- Layer 3 (Apps) → darf Layer 2 + Layer 1 nutzen
-- Layer 2 (Modules) → darf NUR Layer 1 nutzen
-- Layer 1 (Foundation) → keine Abhängigkeiten nach oben
-- Module dürfen NICHT voneinander abhängen
+- Layer 3 (Apps) → may use Layer 2 + Layer 1
+- Layer 2 (Modules) → may ONLY use Layer 1
+- Layer 1 (Foundation) → no dependencies upward
+- Modules must NOT depend on each other
 
 ## Governance Model
 
-Siehe [GOVERNANCE.md](./GOVERNANCE.md) für das vollständige bidirektionale Governance-Modell:
-- **Top-Down (Use):** Products konsumieren Bundles
-- **Bottom-Up (Elevate):** Code wird nach oben refactored wenn Patterns entstehen
+See [GOVERNANCE.md](./GOVERNANCE.md) for the complete bidirectional governance model:
+- **Top-Down (Use):** Products consume bundles
+- **Bottom-Up (Elevate):** Code is refactored upward when patterns emerge
 - **Three-Strike Rule:** 1x Product → 2x App → 3x Module/Foundation
 
-## Quelle
+## Source
 
-Extrahiert aus: /Users/till.kubelkesportalliance.com/Develop/bgm-portal/
+Extracted from: /Users/till.kubelkesportalliance.com/Develop/bgm-portal/
 
-Vollständiger Plan siehe: .cursor/plans/symfony_bundle_modularisierung_*.plan.md
+Complete plan see: .cursor/plans/symfony_bundle_modularisierung_*.plan.md

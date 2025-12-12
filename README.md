@@ -1,8 +1,8 @@
-# 🚀 Nexus Platform - Modulare SaaS Architektur
+# 🚀 Nexus Platform - Modular SaaS Architecture
 
-Eine modulare SaaS-Plattform unter `github.com/The-Nexus-Collective/` mit dem Prefix `till-kubelke-`.
+A modular SaaS platform under `github.com/The-Nexus-Collective/` with the prefix `till-kubelke-`.
 
-## 📐 3-Schichten-Architektur
+## 📐 3-Layer Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -41,7 +41,7 @@ Eine modulare SaaS-Plattform unter `github.com/The-Nexus-Collective/` mit dem Pr
 ### Layer 3: Business Apps
 | Repository | Type | Files | Description |
 |------------|------|-------|-------------|
-| [app-easybgm](https://github.com/The-Nexus-Collective/till-kubelke-app-easybgm) | Symfony Bundle | 36 | BGM 6-Phasen Business Logic |
+| [app-easybgm](https://github.com/The-Nexus-Collective/till-kubelke-app-easybgm) | Symfony Bundle | 36 | BGM 6-Phase Business Logic |
 
 ### Products (Deployable)
 | Repository | Type | Description |
@@ -68,7 +68,7 @@ git clone https://github.com/The-Nexus-Collective/till-kubelke-product-easybgm-f
 ## 🔗 Dependency Rules
 
 ```
-✅ ERLAUBT                    ❌ VERBOTEN
+✅ ALLOWED                    ❌ FORBIDDEN
 Product → App → Module → Found   Module → Module
 App → Module                     Foundation → Module
 App → Foundation                 Module → App
@@ -77,17 +77,17 @@ Module → Foundation              Foundation → App
 
 ## 🏛️ Governance Model
 
-Wir folgen einem **bidirektionalen Inner-Source-Modell** (inspiriert von Design System Governance):
+We follow a **bidirectional Inner-Source model** (inspired by Design System Governance):
 
 | Layer | Governance | Process |
 |-------|------------|---------|
-| Products | Project Team | Keine Genehmigung nötig |
-| Apps + Modules | Guild | Team-Konsensus |
-| Foundation | Architecture Team | RFC erforderlich |
+| Products | Project Team | No approval needed |
+| Apps + Modules | Guild | Team consensus |
+| Foundation | Architecture Team | RFC required |
 
-**Three-Strike Rule:** 1x im Product bauen → 2x App erwägen → 3x Module/Foundation evaluieren
+**Three-Strike Rule:** Build 1x in Product → Consider 2x in App → Evaluate 3x in Module/Foundation
 
-📖 Siehe [GOVERNANCE.md](./GOVERNANCE.md) für das vollständige Modell.
+📖 See [GOVERNANCE.md](./GOVERNANCE.md) for the complete model.
 
 ## 🛠️ Tech Stack
 

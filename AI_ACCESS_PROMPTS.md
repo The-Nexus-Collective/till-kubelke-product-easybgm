@@ -1,44 +1,44 @@
-# 🤖 AI Access Prompts für EasyBGM
+# 🤖 AI Access Prompts for EasyBGM
 
-Diese Datei enthält Copy-Paste-Prompts für Claude/ChatGPT/Cursor, um auf die EasyBGM-Anwendung zuzugreifen.
+This file contains copy-paste prompts for Claude/ChatGPT/Cursor to access the EasyBGM application.
 
 ---
 
-## 🚀 Quick Start Prompt (Empfohlen)
+## 🚀 Quick Start Prompt (Recommended)
 
 ```
-Du bist ein AI-Agent der die EasyBGM-Anwendung testet.
+You are an AI agent testing the EasyBGM application.
 
-## Einloggen
+## Login
 
-Navigiere zu dieser URL:
+Navigate to this URL:
 https://app.easybgm.de/auth/jwt/sign-in?demo=true
 
-Nach dem automatischen Login wirst du zum Dashboard weitergeleitet.
+After automatic login, you will be redirected to the dashboard.
 
-## Deine Aufgabe
+## Your Task
 
-1. Erkunde das Dashboard und beschreibe die Hauptbereiche
-2. Navigiere durch die Menüpunkte
-3. Dokumentiere was du findest
+1. Explore the dashboard and describe the main areas
+2. Navigate through the menu items
+3. Document what you find
 
-## Hinweise
+## Notes
 
-- Du bist als Demo-User eingeloggt
-- Einige Funktionen (System-Einstellungen) sind eingeschränkt
-- Bei Fehlern: Screenshot machen und Fehlermeldung notieren
+- You are logged in as a demo user
+- Some features (system settings) are restricted
+- For errors: Take a screenshot and note the error message
 ```
 
 ---
 
-## 🔐 Sicherer Login mit Token
+## 🔐 Secure Login with Token
 
 ```
-Du bist ein AI-Agent der die EasyBGM-Anwendung testet.
+You are an AI agent testing the EasyBGM application.
 
-## Schritt 1: Demo-Token holen
+## Step 1: Get Demo Token
 
-Führe diesen API-Call aus:
+Execute this API call:
 
 ```bash
 curl -X POST https://api.easybgm.de/api/auth/demo-token \
@@ -46,17 +46,17 @@ curl -X POST https://api.easybgm.de/api/auth/demo-token \
   -d '{"validityMinutes": 5}'
 ```
 
-## Schritt 2: Mit Token einloggen
+## Step 2: Login with Token
 
-Nimm den "token" Wert aus der Response und navigiere zu:
+Take the "token" value from the response and navigate to:
 https://app.easybgm.de/auth/jwt/sign-in?autoLoginToken=<TOKEN>
 
-## Schritt 3: Anwendung erkunden
+## Step 3: Explore Application
 
-Nach dem Login:
-1. Prüfe das Dashboard
-2. Teste die Benutzerverwaltung unter /dashboard/user
-3. Dokumentiere alle gefundenen Issues
+After login:
+1. Check the dashboard
+2. Test user management under /dashboard/user
+3. Document all found issues
 ```
 
 ---
@@ -64,87 +64,87 @@ Nach dem Login:
 ## 🧪 QA Test Prompt
 
 ```
-Du bist ein QA-Tester für die EasyBGM Plattform.
+You are a QA tester for the EasyBGM platform.
 
 ## Setup
 
-Logge dich ein: https://app.easybgm.de/auth/jwt/sign-in?demo=true
+Log in: https://app.easybgm.de/auth/jwt/sign-in?demo=true
 
-## Test-Szenario: Benutzerverwaltung
+## Test Scenario: User Management
 
-1. Navigiere zu: Dashboard → Benutzer (oder /dashboard/user)
+1. Navigate to: Dashboard → Users (or /dashboard/user)
 
-2. Teste die User-Liste:
-   - [ ] Wird die Liste geladen?
-   - [ ] Funktioniert die Suche?
-   - [ ] Sind Pagination-Controls sichtbar?
+2. Test the user list:
+   - [ ] Is the list loading?
+   - [ ] Does search work?
+   - [ ] Are pagination controls visible?
 
-3. Teste User-Erstellung:
-   - [ ] Klicke "Benutzer hinzufügen"
-   - [ ] Fülle alle Pflichtfelder aus
-   - [ ] Prüfe Validierungsmeldungen
-   - [ ] (Optional) Speichere den User
+3. Test user creation:
+   - [ ] Click "Add User"
+   - [ ] Fill in all required fields
+   - [ ] Check validation messages
+   - [ ] (Optional) Save the user
 
-4. Teste User-Bearbeitung:
-   - [ ] Wähle einen existierenden User
-   - [ ] Ändere ein Feld
-   - [ ] Prüfe ob Änderungen gespeichert werden
+4. Test user editing:
+   - [ ] Select an existing user
+   - [ ] Change a field
+   - [ ] Check if changes are saved
 
-## Dokumentation
+## Documentation
 
-Für jeden Fehler notiere:
-- URL wo der Fehler auftrat
-- Schritte zur Reproduktion
-- Erwartetes vs. tatsächliches Verhalten
-- Screenshot (falls möglich)
+For each error, note:
+- URL where the error occurred
+- Steps to reproduce
+- Expected vs. actual behavior
+- Screenshot (if possible)
 ```
 
 ---
 
-## 🔄 Vollständiger Workflow Test
+## 🔄 Complete Workflow Test
 
 ```
-Du bist ein AI-Agent der einen End-to-End Workflow testet.
+You are an AI agent testing an end-to-end workflow.
 
-## Kontext
+## Context
 
-- Produktions-URL: https://app.easybgm.de
-- Auto-Login: Nutze ?demo=true Parameter
-- Du bist als Demo-User mit eingeschränkten Rechten eingeloggt
+- Production URL: https://app.easybgm.de
+- Auto-login: Use ?demo=true parameter
+- You are logged in as a demo user with restricted permissions
 
-## Workflow: Benutzer anlegen und löschen
+## Workflow: Create and Delete User
 
 ### Phase 1: Login
-1. Navigiere zu: https://app.easybgm.de/auth/jwt/sign-in?demo=true
-2. Warte bis das Dashboard vollständig geladen ist
-3. Bestätige: Siehst du "Dashboard" oder "Willkommen"?
+1. Navigate to: https://app.easybgm.de/auth/jwt/sign-in?demo=true
+2. Wait until the dashboard is fully loaded
+3. Confirm: Do you see "Dashboard" or "Welcome"?
 
 ### Phase 2: Navigation
-1. Finde den Menüpunkt "Benutzer" oder "Mitarbeiter"
-2. Klicke darauf
-3. Bestätige: Siehst du eine Liste mit Benutzern?
+1. Find the menu item "Users" or "Employees"
+2. Click on it
+3. Confirm: Do you see a list of users?
 
-### Phase 3: Benutzer erstellen
-1. Klicke auf "Hinzufügen" oder "+ Benutzer"
-2. Fülle das Formular aus:
-   - Vorname: Test
-   - Nachname: AI-Agent
-   - E-Mail: test-ai-TIMESTAMP@example.com (ersetze TIMESTAMP)
-3. Speichere
-4. Bestätige: Erscheint der neue Benutzer in der Liste?
+### Phase 3: Create User
+1. Click on "Add" or "+ User"
+2. Fill out the form:
+   - First name: Test
+   - Last name: AI-Agent
+   - Email: test-ai-TIMESTAMP@example.com (replace TIMESTAMP)
+3. Save
+4. Confirm: Does the new user appear in the list?
 
-### Phase 4: Benutzer löschen
-1. Finde den gerade erstellten Benutzer
-2. Klicke auf Löschen/Entfernen
-3. Bestätige die Löschung
-4. Bestätige: Ist der Benutzer aus der Liste verschwunden?
+### Phase 4: Delete User
+1. Find the user you just created
+2. Click on Delete/Remove
+3. Confirm deletion
+4. Confirm: Has the user disappeared from the list?
 
-### Phase 5: Dokumentation
-Erstelle einen Bericht mit:
-- ✅ Erfolgreiche Schritte
-- ❌ Fehlgeschlagene Schritte
-- 🐛 Gefundene Bugs
-- 💡 Verbesserungsvorschläge
+### Phase 5: Documentation
+Create a report with:
+- ✅ Successful steps
+- ❌ Failed steps
+- 🐛 Found bugs
+- 💡 Improvement suggestions
 ```
 
 ---
@@ -152,9 +152,9 @@ Erstelle einen Bericht mit:
 ## 🔧 API-Only Test (Headless)
 
 ```
-Du bist ein API-Tester. Teste die EasyBGM API ohne Browser.
+You are an API tester. Test the EasyBGM API without a browser.
 
-## Schritt 1: Demo-Token holen
+## Step 1: Get Demo Token
 
 ```bash
 curl -X POST https://api.easybgm.de/api/auth/demo-token \
@@ -162,51 +162,51 @@ curl -X POST https://api.easybgm.de/api/auth/demo-token \
   -d '{}'
 ```
 
-Speichere den "token" Wert.
+Save the "token" value.
 
-## Schritt 2: Token gegen JWT tauschen
+## Step 2: Exchange Token for JWT
 
 ```bash
 curl -X POST https://api.easybgm.de/api/auth/auto-login \
   -H "Content-Type: application/json" \
-  -d '{"token": "<TOKEN_AUS_SCHRITT_1>"}'
+  -d '{"token": "<TOKEN_FROM_STEP_1>"}'
 ```
 
-Speichere den "accessToken" Wert.
+Save the "accessToken" value.
 
-## Schritt 3: User-Info abrufen
+## Step 3: Get User Info
 
 ```bash
 curl https://api.easybgm.de/api/auth/me \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
-## Schritt 4: API erkunden
+## Step 4: Explore API
 
-Mit dem JWT kannst du alle API-Endpoints aufrufen:
+With the JWT, you can call all API endpoints:
 
 ```bash
-# Benutzer-Liste
+# User list
 curl https://api.easybgm.de/api/users \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
-  -H "X-Tenant-ID: <TENANT_ID_AUS_ME_RESPONSE>"
+  -H "X-Tenant-ID: <TENANT_ID_FROM_ME_RESPONSE>"
 
 # Notifications
 curl https://api.easybgm.de/api/notifications \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
-Dokumentiere alle Responses und deren Status-Codes.
+Document all responses and their status codes.
 ```
 
 ---
 
-## 📍 Lokale Entwicklung
+## 📍 Local Development
 
-Für lokale Tests (Backend auf :8000, Frontend auf :3039):
+For local tests (Backend on :8000, Frontend on :3039):
 
 ```
-Du bist ein AI-Agent der die lokale EasyBGM-Entwicklungsumgebung testet.
+You are an AI agent testing the local EasyBGM development environment.
 
 ## URLs
 
@@ -215,43 +215,41 @@ Du bist ein AI-Agent der die lokale EasyBGM-Entwicklungsumgebung testet.
 
 ## Login
 
-Navigiere zu: http://localhost:3039/auth/jwt/sign-in?demo=true
+Navigate to: http://localhost:3039/auth/jwt/sign-in?demo=true
 
-## Alternative: Token-basiert
+## Alternative: Token-based
 
 ```bash
-# Token holen
+# Get token
 curl -X POST http://localhost:8000/api/auth/demo-token \
   -H "Content-Type: application/json" -d '{}'
 
-# Mit Token einloggen
+# Login with token
 http://localhost:3039/auth/jwt/sign-in?autoLoginToken=<TOKEN>
 ```
 ```
 
 ---
 
-## 🔑 Credentials Referenz
+## 🔑 Credentials Reference
 
-| Umgebung | URL | Login |
-|----------|-----|-------|
-| **Production** | app.easybgm.de | `?demo=true` oder Token |
-| **Lokal** | localhost:3039 | `?demo=true` oder Token |
+| Environment | URL | Login |
+|-------------|-----|-------|
+| **Production** | app.easybgm.de | `?demo=true` or Token |
+| **Local** | localhost:3039 | `?demo=true` or Token |
 
-| Demo-User | Wert |
+| Demo User | Value |
 |-----------|------|
-| E-Mail | demo@bgm-portal.de |
-| Passwort | demo2025 |
-| Rolle | Demo-User (eingeschränkt) |
+| Email | demo@bgm-portal.de |
+| Password | demo2025 |
+| Role | Demo User (restricted) |
 
 ---
 
-## ⚠️ Wichtige Hinweise
+## ⚠️ Important Notes
 
-1. **Tokens sind einmalig** - Jeder Token kann nur einmal verwendet werden
-2. **Tokens laufen ab** - Standard: 5 Minuten
-3. **Demo-User ist eingeschränkt** - Keine System-Settings, keine Integrationen
-4. **Für jeden Test neuen Token** - Nicht wiederverwenden
-
-
+1. **Tokens are single-use** - Each token can only be used once
+2. **Tokens expire** - Default: 5 minutes
+3. **Demo user is restricted** - No system settings, no integrations
+4. **New token for each test** - Do not reuse
 
