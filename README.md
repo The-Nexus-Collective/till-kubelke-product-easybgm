@@ -75,6 +75,12 @@ App → Foundation                 Module → App
 Module → Foundation              Foundation → App
 ```
 
+## 🗄️ Technology Rules
+
+- **Database:** PostgreSQL (NOT MySQL) - All database configurations, migrations, and queries must use PostgreSQL
+- **Backend:** Symfony 7.3, API Platform, Doctrine ORM
+- **Frontend:** React 19, Vite, MUI v7, SWR, TypeScript
+
 ## 🏛️ Governance Model
 
 We follow a **bidirectional Inner-Source model** (inspired by Design System Governance):

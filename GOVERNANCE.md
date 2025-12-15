@@ -84,6 +84,9 @@ return [
 - ❌ Modules → CANNOT use other Modules
 - ❌ Foundation → NO upward dependencies
 
+**Technology Rules:**
+- **Database:** PostgreSQL (NOT MySQL) - All database configurations, migrations, and queries must use PostgreSQL
+
 ---
 
 ## Part 2: Bottom-Up (Elevate) ⬆️
@@ -740,6 +743,7 @@ BOTTOM-UP (Elevate): Foundation ← Modules ← Apps ← Products
 *"Good architecture is about making the right things easy and the wrong things hard."*
 
 — The Nexus Collective
+
 
 
 

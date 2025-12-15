@@ -53,6 +53,10 @@ EasyBGM is the first product, but the architecture enables any number of additio
 - Layer 1 (Foundation) → no dependencies upward
 - Modules must NOT depend on each other
 
+## Technology Rules
+
+- **Database:** PostgreSQL (NOT MySQL) - All database configurations, migrations, and queries must use PostgreSQL
+
 ## Governance Model
 
 See [GOVERNANCE.md](./GOVERNANCE.md) for the complete bidirectional governance model:
