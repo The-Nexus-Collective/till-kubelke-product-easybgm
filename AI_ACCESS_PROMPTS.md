@@ -253,3 +253,5 @@ http://localhost:3039/auth/jwt/sign-in?autoLoginToken=<TOKEN>
 3. **Demo user is restricted** - No system settings, no integrations
 4. **New token for each test** - Do not reuse
 
+
+
