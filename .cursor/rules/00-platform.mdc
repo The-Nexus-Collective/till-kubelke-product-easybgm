@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # 🚀 Nexus Platform - Modulare SaaS Architektur
 
 *Willkommen! Dies ist eine modulare SaaS-Plattform mit Symfony Bundles und React Packages.*

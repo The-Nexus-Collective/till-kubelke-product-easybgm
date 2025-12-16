@@ -86,9 +86,10 @@ setup_test_database() {
     cd "$BACKEND_DIR"
     
     # Create .env.test.local 
+    # Note: Use 'app' as database name - Doctrine will automatically append '_test' in test environment
     cat > .env.test.local << ENVEOF
 # Auto-generated for E2E tests - DO NOT COMMIT
-DATABASE_URL="postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&charset=utf8"
+DATABASE_URL="postgresql://app:app_secret@127.0.0.1:5432/app?serverVersion=16&charset=utf8"
 ENVEOF
     
     # Clear cache and run migrations
@@ -113,11 +114,18 @@ start_test_backend() {
         sleep 1
     fi
     
+    # Clear cache to ensure fresh configuration
+    print_info "Clearing test cache..."
+    rm -rf var/cache/test 2>/dev/null || true
+    APP_ENV=test php bin/console cache:clear --no-interaction > /dev/null 2>&1 || true
+    
     # Start PHP built-in server with test environment
-    APP_ENV=test php -S 127.0.0.1:$TEST_BACKEND_PORT -t public > "$PID_DIR/backend.log" 2>&1 &
+    # IMPORTANT: Use router.php to properly propagate APP_ENV to $_SERVER/$_ENV
+    # The PHP built-in server only sets env vars via getenv(), but Symfony needs $_SERVER
+    APP_ENV=test php -S 127.0.0.1:$TEST_BACKEND_PORT -t public public/router.php > "$PID_DIR/backend.log" 2>&1 &
     echo $! > "$PID_DIR/backend.pid"
     
-    sleep 2
+    sleep 3
     print_success "Test backend ready on port $TEST_BACKEND_PORT"
 }
 
