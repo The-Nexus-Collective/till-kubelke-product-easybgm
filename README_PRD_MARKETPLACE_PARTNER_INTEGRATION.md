@@ -286,33 +286,185 @@ Two modes for different needs:
 
 ## Technical Architecture Overview
 
+### Module Placement
+
+Following the platform's 3-layer architecture and governance rules:
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      LAYER 2: MODULES                           │
+│ LAYER 3: PRODUCTS                                               │
+│                                                                 │
+│  product-easybgm-backend/                                       │
+│  └── Orchestrates modules, handles app-specific logic           │
+│                                                                 │
+│  product-easybgm-frontend/                                      │
+│  └── Partner widgets, engagement UI, health day planner UI      │
 ├─────────────────────────────────────────────────────────────────┤
+│ LAYER 2: MODULES                                                │
 │                                                                 │
-│  module-marketplace (EXTENDED)                                  │
-│  ├── Entity/                                                    │
-│  │   ├── ServiceProvider.php                                    │
-│  │   ├── ServiceOffering.php  ← Add data scope fields           │
-│  │   ├── PartnerEngagement.php  ← NEW                           │
-│  │   └── InterventionParticipation.php  ← NEW                   │
-│  ├── Service/                                                   │
-│  │   ├── PartnerMatchingService.php  ← NEW                      │
-│  │   └── ParticipationAggregationService.php  ← NEW             │
-│  └── Registry/                                                  │
-│      ├── DataScopeRegistry.php  ← NEW                           │
-│      └── OutputTypeRegistry.php  ← NEW                          │
+│  module-marketplace/ (EXTENDED)                                 │
+│  module-health-day/ (NEW)                                       │
 │                                                                 │
-│  module-health-day (NEW)                                        │
-│  ├── Entity/                                                    │
-│  │   ├── HealthDay.php                                          │
-│  │   ├── HealthDayModule.php                                    │
-│  │   └── HealthDayRegistration.php                              │
-│  └── Service/                                                   │
-│      └── HealthDayPlannerService.php                            │
+├─────────────────────────────────────────────────────────────────┤
+│ LAYER 1: FOUNDATION                                             │
 │                                                                 │
+│  platform-foundation/                                           │
+│  └── Tenant, User, Employee (via HR module)                     │
 └─────────────────────────────────────────────────────────────────┘
+```
+
+### Module 1: `till-kubelke-module-marketplace` (Extended)
+
+**Location:** `till-kubelke-module-marketplace/src/`
+
+```
+src/
+├── Entity/
+│   ├── Category.php                    # existing
+│   ├── Tag.php                         # existing
+│   ├── ServiceProvider.php             # existing
+│   ├── ServiceOffering.php             # MODIFY: add data scope fields
+│   ├── ServiceInquiry.php              # existing
+│   ├── PartnerEngagement.php           # NEW: active collaboration tracking
+│   └── InterventionParticipation.php   # NEW: who attended what
+│
+├── Repository/
+│   ├── ServiceProviderRepository.php   # existing
+│   ├── PartnerEngagementRepository.php # NEW
+│   └── InterventionParticipationRepository.php  # NEW
+│
+├── Registry/                           # NEW folder
+│   ├── DataScopeRegistry.php           # NEW: defines shareable data types
+│   └── OutputTypeRegistry.php          # NEW: defines result types & integration points
+│
+├── Service/
+│   ├── ProviderService.php             # existing
+│   ├── InquiryService.php              # existing
+│   ├── EngagementService.php           # NEW: engagement workflow logic
+│   ├── PartnerMatchingService.php      # NEW: AI-powered partner suggestions
+│   └── ParticipationAggregationService.php  # NEW: anonymous stats for partners
+│
+├── Controller/
+│   ├── CatalogController.php           # existing
+│   ├── ProviderController.php          # existing
+│   ├── InquiryController.php           # existing
+│   ├── AdminController.php             # existing
+│   └── EngagementController.php        # NEW: engagement workflow endpoints
+│
+└── MarketplaceModuleBundle.php         # existing
+```
+
+**Why here?** Partner Engagement is the natural next step after discovery in the catalog. It's the "transaction" that happens after browsing.
+
+---
+
+### Module 2: `till-kubelke-module-health-day` (New)
+
+**Location:** `till-kubelke-module-health-day/` (create new)
+
+```
+till-kubelke-module-health-day/
+├── composer.json
+├── phpunit.xml.dist
+├── README.md
+├── Resources/
+│   └── config/
+│       └── services.yaml
+├── src/
+│   ├── HealthDayModuleBundle.php
+│   │
+│   ├── Entity/
+│   │   ├── HealthDay.php               # The event itself
+│   │   ├── HealthDayModule.php         # Individual stations/activities
+│   │   └── HealthDayRegistration.php   # Employee sign-ups
+│   │
+│   ├── Repository/
+│   │   ├── HealthDayRepository.php
+│   │   ├── HealthDayModuleRepository.php
+│   │   └── HealthDayRegistrationRepository.php
+│   │
+│   ├── Service/
+│   │   ├── HealthDayPlannerService.php # Planning logic
+│   │   └── HealthDayReportService.php  # Post-event reporting
+│   │
+│   └── Controller/
+│       └── HealthDayController.php
+│
+└── Tests/
+    └── Unit/
+        └── Entity/
+            └── HealthDayTest.php
+```
+
+**Why separate module?** Health Day planning is a distinct bounded context. It can work standalone (DIY mode without marketplace) or integrated (modules from marketplace).
+
+---
+
+### Dependency Rules (Governance Compliant)
+
+```
+✅ ALLOWED                           ❌ NOT ALLOWED
+─────────────────────────────────    ─────────────────────────────────
+module-marketplace → foundation     module-marketplace → module-health-day
+module-health-day → foundation      module-health-day → module-marketplace
+app-easybgm → both modules          modules → app-easybgm
+product → app → modules             foundation → modules
+```
+
+**How do they communicate?**
+- Via **Foundation entities** (Tenant, User)
+- Via **Events** dispatched through Foundation
+- The **app-easybgm** layer orchestrates when both modules need to interact
+
+**Example:** When a HealthDayModule links to a ServiceOffering:
+```php
+// In app-easybgm (Layer 3), NOT in the modules
+class BgmHealthDayService
+{
+    public function linkModuleToOffering(
+        HealthDayModule $module,
+        ServiceOffering $offering
+    ): PartnerEngagement {
+        // App layer handles the cross-module orchestration
+    }
+}
+```
+
+---
+
+### Frontend Structure
+
+**Location:** `till-kubelke-product-easybgm-frontend/src/`
+
+```
+src/
+├── sections/
+│   └── marketplace/                    # NEW section
+│       ├── partner-suggestion-widget.tsx
+│       ├── data-grant-dialog.tsx
+│       ├── engagement-dashboard.tsx
+│       └── engagement-card.tsx
+│
+├── sections/
+│   └── health-day/                     # NEW section
+│       ├── health-day-planner.tsx
+│       ├── health-day-timeline.tsx
+│       ├── module-selector.tsx
+│       └── registration-manager.tsx
+│
+├── hooks/
+│   ├── use-partner-suggestions.ts      # NEW
+│   ├── use-engagements.ts              # NEW
+│   ├── use-health-day.ts               # NEW
+│   └── use-participation.ts            # NEW
+│
+└── pages/
+    └── dashboard/
+        └── bgm/
+            ├── partners.tsx            # NEW: engagement dashboard page
+            └── health-day/
+                ├── index.tsx           # NEW: health day list
+                └── [id].tsx            # NEW: health day detail/planner
 ```
 
 ---
@@ -334,6 +486,7 @@ Two modes for different needs:
 | Date | Change | By |
 |------|--------|-----|
 | 2024-12-16 | Initial PRD created | Ryan & Leanna |
+| 2024-12-16 | Added detailed module structure and file placement | Ryan & Leanna |
 
 ---
 
