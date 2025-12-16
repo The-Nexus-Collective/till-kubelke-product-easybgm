@@ -13,7 +13,7 @@
 #
 # Prerequisites:
 #   1. Docker must be running (./run.sh start)
-#   2. Development environment must be running (./run.sh start)
+#   2. Test environment must be running (./run-test-env.sh)
 
 set -e
 
@@ -24,7 +24,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-CYAN='\033[0;36m'
+CYAN='\033[0m'
 NC='\033[0m'
 
 print_info() { echo -e "${BLUE}[VISUAL-TEST]${NC} $1"; }
@@ -32,10 +32,10 @@ print_success() { echo -e "${GREEN}[VISUAL-TEST]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[VISUAL-TEST]${NC} $1"; }
 print_error() { echo -e "${RED}[VISUAL-TEST]${NC} $1"; }
 
-# Configuration
-# Visual tests run against DEV environment (8080) for stability - demo users always exist
-DEV_FRONTEND_PORT=8080
-DEV_BACKEND_PORT=8000
+# Configuration - MUST use TEST environment, NOT DEV!
+# Test users (manager@demo.local etc.) only exist in app_test database
+TEST_FRONTEND_PORT=8081
+TEST_BACKEND_PORT=8001
 FRONTEND_DIR="till-kubelke-product-easybgm-frontend"
 
 # Parse arguments
@@ -55,27 +55,27 @@ check_docker() {
     print_success "Docker is running"
 }
 
-# Check if development environment is running
-check_dev_environment() {
-    print_info "Checking development environment..."
+# Check if TEST environment is running (NOT dev!)
+check_test_environment() {
+    print_info "Checking TEST environment (port $TEST_FRONTEND_PORT/$TEST_BACKEND_PORT)..."
     
     # Check backend
-    if ! curl -s http://127.0.0.1:$DEV_BACKEND_PORT/api/health > /dev/null 2>&1; then
-        print_error "Backend is not running on port $DEV_BACKEND_PORT!"
-        print_info "Please start the development environment first:"
-        print_info "  ./run.sh start"
+    if ! curl -s http://127.0.0.1:$TEST_BACKEND_PORT/api/health > /dev/null 2>&1; then
+        print_error "Test backend is not running on port $TEST_BACKEND_PORT!"
+        print_info "Please start the TEST environment first:"
+        print_info "  ./run-test-env.sh"
         exit 1
     fi
-    print_success "Backend is running on port $DEV_BACKEND_PORT"
+    print_success "Test backend is running on port $TEST_BACKEND_PORT"
     
     # Check frontend
-    if ! curl -s http://127.0.0.1:$DEV_FRONTEND_PORT > /dev/null 2>&1; then
-        print_error "Frontend is not running on port $DEV_FRONTEND_PORT!"
-        print_info "Please start the development environment first:"
-        print_info "  ./run.sh start"
+    if ! curl -s http://127.0.0.1:$TEST_FRONTEND_PORT > /dev/null 2>&1; then
+        print_error "Test frontend is not running on port $TEST_FRONTEND_PORT!"
+        print_info "Please start the TEST environment first:"
+        print_info "  ./run-test-env.sh"
         exit 1
     fi
-    print_success "Frontend is running on port $DEV_FRONTEND_PORT"
+    print_success "Test frontend is running on port $TEST_FRONTEND_PORT"
 }
 
 # Run the visual test
@@ -113,10 +113,11 @@ main() {
     print_info "=========================================="
     print_info "Nexus Platform - Visual E2E Test Runner"
     print_info "=========================================="
+    print_info "Using TEST environment (8081/8001) - NOT dev!"
     echo ""
     
     check_docker
-    check_dev_environment
+    check_test_environment
     echo ""
     
     run_visual_test
