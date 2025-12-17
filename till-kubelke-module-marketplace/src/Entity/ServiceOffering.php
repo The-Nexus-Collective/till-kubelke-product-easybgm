@@ -68,6 +68,45 @@ class ServiceOffering
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
     private int $sortOrder = 0;
 
+    // ========== Partner Integration Fields ==========
+
+    /**
+     * Data scopes required from the customer to deliver this service.
+     * e.g. ["employee_list", "goals", "survey_results"]
+     * @see DataScopeRegistry for available scopes
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $requiredDataScopes = null;
+
+    /**
+     * Types of data/results this service delivers back.
+     * e.g. ["copsoq_analysis", "participation_stats", "health_report"]
+     * @see OutputTypeRegistry for available types
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $outputDataTypes = null;
+
+    /**
+     * Where the results "plug in" to the BGM process.
+     * e.g. ["phase_2.analysis", "kpi.custom", "legal.gefaehrdungsbeurteilung"]
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $integrationPoints = null;
+
+    /**
+     * Which BGM phases this offering is relevant for (1-6).
+     * e.g. [2, 3, 4] for Analysis, Planning, Implementation phases
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $relevantPhases = null;
+
+    /**
+     * Is this an orchestrator service that coordinates other providers?
+     * e.g. Health insurance offering full-service health day planning
+     */
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $isOrchestratorService = false;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -244,6 +283,99 @@ class ServiceOffering
         return $this;
     }
 
+    // ========== Partner Integration Getters/Setters ==========
+
+    public function getRequiredDataScopes(): ?array
+    {
+        return $this->requiredDataScopes;
+    }
+
+    public function setRequiredDataScopes(?array $requiredDataScopes): static
+    {
+        $this->requiredDataScopes = $requiredDataScopes;
+        return $this;
+    }
+
+    /**
+     * Check if this offering requires a specific data scope.
+     */
+    public function requiresDataScope(string $scope): bool
+    {
+        return $this->requiredDataScopes !== null 
+            && in_array($scope, $this->requiredDataScopes, true);
+    }
+
+    public function getOutputDataTypes(): ?array
+    {
+        return $this->outputDataTypes;
+    }
+
+    public function setOutputDataTypes(?array $outputDataTypes): static
+    {
+        $this->outputDataTypes = $outputDataTypes;
+        return $this;
+    }
+
+    /**
+     * Check if this offering delivers a specific output type.
+     */
+    public function deliversOutputType(string $type): bool
+    {
+        return $this->outputDataTypes !== null 
+            && in_array($type, $this->outputDataTypes, true);
+    }
+
+    public function getIntegrationPoints(): ?array
+    {
+        return $this->integrationPoints;
+    }
+
+    public function setIntegrationPoints(?array $integrationPoints): static
+    {
+        $this->integrationPoints = $integrationPoints;
+        return $this;
+    }
+
+    /**
+     * Check if results integrate at a specific point.
+     */
+    public function integratesAt(string $point): bool
+    {
+        return $this->integrationPoints !== null 
+            && in_array($point, $this->integrationPoints, true);
+    }
+
+    public function getRelevantPhases(): ?array
+    {
+        return $this->relevantPhases;
+    }
+
+    public function setRelevantPhases(?array $relevantPhases): static
+    {
+        $this->relevantPhases = $relevantPhases;
+        return $this;
+    }
+
+    /**
+     * Check if this offering is relevant for a specific BGM phase (1-6).
+     */
+    public function isRelevantForPhase(int $phase): bool
+    {
+        return $this->relevantPhases !== null 
+            && in_array($phase, $this->relevantPhases, true);
+    }
+
+    public function isOrchestratorService(): bool
+    {
+        return $this->isOrchestratorService;
+    }
+
+    public function setIsOrchestratorService(bool $isOrchestratorService): static
+    {
+        $this->isOrchestratorService = $isOrchestratorService;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
@@ -278,6 +410,12 @@ class ServiceOffering
             'maxParticipants' => $this->maxParticipants,
             'isActive' => $this->isActive,
             'sortOrder' => $this->sortOrder,
+            // Partner Integration fields
+            'requiredDataScopes' => $this->requiredDataScopes,
+            'outputDataTypes' => $this->outputDataTypes,
+            'integrationPoints' => $this->integrationPoints,
+            'relevantPhases' => $this->relevantPhases,
+            'isOrchestratorService' => $this->isOrchestratorService,
             'createdAt' => $this->createdAt?->format('c'),
             'updatedAt' => $this->updatedAt?->format('c'),
         ];
