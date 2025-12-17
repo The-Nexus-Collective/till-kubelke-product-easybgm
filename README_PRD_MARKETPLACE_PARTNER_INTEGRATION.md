@@ -189,13 +189,13 @@ Two modes for different needs:
 
 | # | Deliverable | Status | Notes |
 |---|-------------|--------|-------|
-| 1.1 | **ServiceOffering Entity Extension** | ⬜ TODO | Add `requiredDataScopes`, `outputDataTypes`, `integrationPoints`, `relevantPhases` |
-| 1.2 | **PartnerEngagement Entity** | ⬜ TODO | Track active collaborations with status flow |
-| 1.3 | **DataScopeRegistry** | ⬜ TODO | Central definition of all shareable data types |
-| 1.4 | **Engagement API** | ⬜ TODO | Endpoints: create, update-status, grant-data |
-| 1.5 | **Partner Suggestion Widget** | ⬜ TODO | Show relevant partners in phase views |
-| 1.6 | **Data Grant Dialog** | ⬜ TODO | UI for explicit data access approval |
-| 1.7 | **Engagement Dashboard** | ⬜ TODO | List active partner engagements with status |
+| 1.1 | **ServiceOffering Entity Extension** | ✅ DONE | Add `requiredDataScopes`, `outputDataTypes`, `integrationPoints`, `relevantPhases` |
+| 1.2 | **PartnerEngagement Entity** | ✅ DONE | Track active collaborations with status flow |
+| 1.3 | **DataScopeRegistry** | ✅ DONE | Central definition of all shareable data types |
+| 1.4 | **Engagement API** | ✅ DONE | Endpoints: create, update-status, grant-data |
+| 1.5 | **Partner Suggestion Widget** | ✅ DONE | Show relevant partners in phase views |
+| 1.6 | **Data Grant Dialog** | ✅ DONE | UI for explicit data access approval |
+| 1.7 | **Engagement Dashboard** | ✅ DONE | List active partner engagements with status |
 | 1.8 | **Basic Result Upload** | ⬜ TODO | Partner can upload result files/JSON |
 
 **MVP Definition of Done:**
@@ -212,11 +212,11 @@ Two modes for different needs:
 
 | # | Deliverable | Status | Notes |
 |---|-------------|--------|-------|
-| 2.1 | **InterventionParticipation Entity** | ⬜ TODO | Central participation records |
-| 2.2 | **Registration Flow** | ⬜ TODO | Employees can sign up for interventions |
+| 2.1 | **InterventionParticipation Entity** | ✅ DONE | Central participation records |
+| 2.2 | **Registration Flow** | ✅ DONE | Employees can sign up for interventions |
 | 2.3 | **Attendance Tracking UI** | ⬜ TODO | BGM manager marks who attended |
-| 2.4 | **Aggregation Service** | ⬜ TODO | Generate anonymous stats for partners |
-| 2.5 | **Participation Reports** | ⬜ TODO | Export for insurance documentation |
+| 2.4 | **Aggregation Service** | ✅ DONE | Generate anonymous stats for partners |
+| 2.5 | **Participation Reports** | ✅ DONE | Export for insurance documentation |
 
 **Phase 2 Definition of Done:**
 - [ ] Employees can register for interventions
@@ -231,7 +231,7 @@ Two modes for different needs:
 
 | # | Deliverable | Status | Notes |
 |---|-------------|--------|-------|
-| 3.1 | **OutputTypeRegistry** | ⬜ TODO | Define all result types and where they land |
+| 3.1 | **OutputTypeRegistry** | ✅ DONE | Define all result types and where they land |
 | 3.2 | **Integration Point Handlers** | ⬜ TODO | Logic to "plug in" results to correct location |
 | 3.3 | **Phase 2 Analysis Integration** | ⬜ TODO | Survey results appear in Analysis tab |
 | 3.4 | **KPI Custom Integration** | ⬜ TODO | External stats as KPI cards |
