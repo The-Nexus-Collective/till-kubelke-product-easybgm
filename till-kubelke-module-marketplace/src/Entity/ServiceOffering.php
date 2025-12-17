@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Represents individual service offerings that a provider can offer
  * to companies, such as workshops, fitness programs, coaching sessions, etc.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: \TillKubelke\ModuleMarketplace\Repository\ServiceOfferingRepository::class)]
 #[ORM\Table(name: 'marketplace_service_offerings')]
 #[ORM\HasLifecycleCallbacks]
 class ServiceOffering
