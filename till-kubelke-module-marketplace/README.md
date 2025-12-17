@@ -11,7 +11,6 @@ BGM Service Provider Directory and Inquiry System for the Nexus Platform.
 
 ## Categories
 
-Based on the Saneware BGM-Toolbox model:
 - Bewegung (Movement)
 - Ernährung (Nutrition)
 - Mentale Gesundheit (Mental Health)

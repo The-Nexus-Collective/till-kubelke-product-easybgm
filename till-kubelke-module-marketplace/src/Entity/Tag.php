@@ -11,8 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Tag Entity - Fine-grained service tags for BGM providers.
  * 
- * Tags based on the Saneware BGM-Toolbox model:
- * Achtsamkeit, Bewegte Pause, BGM-Beratung, Check-Ups, Coaching,
+ * Examples: Achtsamkeit, Bewegte Pause, BGM-Beratung, Check-Ups, Coaching,
  * Digitales BGM, EAP, Entspannung, Firmenfitness, GB Psych,
  * Gesund führen, Gesundheitstage, Rückengesundheit, Resilienz,
  * Teambuilding, Workshops, etc.

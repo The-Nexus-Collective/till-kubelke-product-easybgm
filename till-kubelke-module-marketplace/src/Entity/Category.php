@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Category Entity - Main service categories for BGM providers.
  * 
- * Categories based on the Saneware BGM-Toolbox model:
+ * Categories include:
  * - Bewegung (Movement)
  * - Ernährung (Nutrition)
  * - Mentale Gesundheit (Mental Health)
