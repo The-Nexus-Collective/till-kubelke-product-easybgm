@@ -403,3 +403,4 @@ class ReviewController extends AbstractController
         return $this->entityManager->getRepository(Tenant::class)->find($tenantId);
     }
 }
+

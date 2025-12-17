@@ -207,3 +207,4 @@ final class DataScopeRegistry
         return $labels;
     }
 }
+

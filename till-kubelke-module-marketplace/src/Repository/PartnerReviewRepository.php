@@ -186,3 +186,4 @@ class PartnerReviewRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 }
+

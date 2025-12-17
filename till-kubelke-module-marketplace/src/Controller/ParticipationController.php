@@ -425,3 +425,4 @@ class ParticipationController extends AbstractController
         );
     }
 }
+

@@ -320,3 +320,4 @@ class InterventionParticipationTest extends TestCase
         $this->assertTrue($anonymized['hasFeedback']);
     }
 }
+

@@ -318,3 +318,4 @@ class ResultIntegrationService
         return new \DateTimeImmutable($validityPeriod);
     }
 }
+

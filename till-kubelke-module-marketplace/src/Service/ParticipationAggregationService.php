@@ -209,3 +209,4 @@ class ParticipationAggregationService
         return $months[$month] ?? '';
     }
 }
+

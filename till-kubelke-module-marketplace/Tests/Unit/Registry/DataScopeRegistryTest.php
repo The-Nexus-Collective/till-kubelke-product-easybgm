@@ -227,3 +227,4 @@ class DataScopeRegistryTest extends TestCase
         }
     }
 }
+

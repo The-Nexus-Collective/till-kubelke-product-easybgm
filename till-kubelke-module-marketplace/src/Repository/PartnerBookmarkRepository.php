@@ -63,3 +63,4 @@ class PartnerBookmarkRepository extends ServiceEntityRepository
         return array_map(fn($row) => (int) $row['providerId'], $result);
     }
 }
+
