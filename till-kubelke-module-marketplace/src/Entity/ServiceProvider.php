@@ -58,6 +58,13 @@ class ServiceProvider
     #[Assert\Url]
     private ?string $logoUrl = null;
 
+    /**
+     * Cover/header image for the provider card.
+     */
+    #[ORM\Column(type: Types::STRING, length: 500, nullable: true)]
+    #[Assert\Url]
+    private ?string $coverImageUrl = null;
+
     #[ORM\Column(type: Types::STRING, length: 500, nullable: true)]
     #[Assert\Url]
     private ?string $website = null;
@@ -76,6 +83,12 @@ class ServiceProvider
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $offersRemote = false;
+
+    /**
+     * Premium partners get special highlighting and priority placement.
+     */
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $isPremium = false;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $createdAt = null;
@@ -220,6 +233,17 @@ class ServiceProvider
         return $this;
     }
 
+    public function getCoverImageUrl(): ?string
+    {
+        return $this->coverImageUrl;
+    }
+
+    public function setCoverImageUrl(?string $coverImageUrl): static
+    {
+        $this->coverImageUrl = $coverImageUrl;
+        return $this;
+    }
+
     public function getWebsite(): ?string
     {
         return $this->website;
@@ -314,6 +338,17 @@ class ServiceProvider
     public function setOffersRemote(bool $offersRemote): static
     {
         $this->offersRemote = $offersRemote;
+        return $this;
+    }
+
+    public function isPremium(): bool
+    {
+        return $this->isPremium;
+    }
+
+    public function setIsPremium(bool $isPremium): static
+    {
+        $this->isPremium = $isPremium;
         return $this;
     }
 
@@ -438,6 +473,54 @@ class ServiceProvider
         return $this->inquiries;
     }
 
+    // ========== Computed Properties ==========
+
+    /**
+     * Get all unique relevant phases from all offerings.
+     * @return int[]
+     */
+    public function getRelevantPhases(): array
+    {
+        $phases = [];
+        foreach ($this->offerings as $offering) {
+            $offeringPhases = $offering->getRelevantPhases();
+            if ($offeringPhases) {
+                $phases = array_merge($phases, $offeringPhases);
+            }
+        }
+        $phases = array_unique($phases);
+        sort($phases);
+        return array_values($phases);
+    }
+
+    /**
+     * Check if provider has any §20 SGB V certified offerings.
+     */
+    public function hasCertifiedOfferings(): bool
+    {
+        foreach ($this->offerings as $offering) {
+            if ($offering->isCertified()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get all unique certification names from offerings.
+     * @return string[]
+     */
+    public function getCertificationNames(): array
+    {
+        $names = [];
+        foreach ($this->offerings as $offering) {
+            if ($offering->isCertified() && $offering->getCertificationName()) {
+                $names[] = $offering->getCertificationName();
+            }
+        }
+        return array_unique($names);
+    }
+
     public function toArray(bool $includeDetails = false): array
     {
         $data = [
@@ -445,13 +528,19 @@ class ServiceProvider
             'companyName' => $this->companyName,
             'shortDescription' => $this->shortDescription,
             'logoUrl' => $this->logoUrl,
+            'coverImageUrl' => $this->coverImageUrl,
             'website' => $this->website,
             'status' => $this->status,
             'isNationwide' => $this->isNationwide,
             'offersRemote' => $this->offersRemote,
+            'isPremium' => $this->isPremium,
             'categories' => array_map(fn(Category $c) => $c->toArray(), $this->categories->toArray()),
             'tags' => array_map(fn(Tag $t) => $t->toArray(), $this->tags->toArray()),
             'createdAt' => $this->createdAt?->format('c'),
+            // Computed properties for card display
+            'relevantPhases' => $this->getRelevantPhases(),
+            'hasCertifiedOfferings' => $this->hasCertifiedOfferings(),
+            'certifications' => $this->getCertificationNames(),
         ];
 
         if ($includeDetails) {
