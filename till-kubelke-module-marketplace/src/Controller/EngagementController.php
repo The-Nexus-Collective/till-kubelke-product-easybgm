@@ -367,6 +367,162 @@ class EngagementController extends AbstractController
         return new JsonResponse(['success' => true]);
     }
 
+    // ========== Result Upload ==========
+
+    /**
+     * Get all delivered results for an engagement.
+     */
+    #[Route('/{id}/results', name: 'list_results', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function listResults(Request $request, int $id): JsonResponse
+    {
+        $tenant = $this->getTenantFromRequest($request);
+        if ($tenant === null) {
+            return $this->missingTenantError();
+        }
+
+        $engagement = $this->engagementService->getEngagement($tenant, $id);
+        if ($engagement === null) {
+            return new JsonResponse(
+                ['error' => 'Engagement not found'],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        return new JsonResponse([
+            'results' => $engagement->getDeliveredOutputs() ?? [],
+            'count' => count($engagement->getDeliveredOutputs() ?? []),
+        ]);
+    }
+
+    /**
+     * Upload a result for an engagement.
+     * 
+     * Expected JSON payload:
+     * {
+     *   "outputType": "copsoq_analysis",
+     *   "data": { ... structured data ... },
+     *   "fileUrl": "/uploads/result.pdf" (optional),
+     *   "summary": "Brief description" (optional)
+     * }
+     */
+    #[Route('/{id}/results', name: 'upload_result', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function uploadResult(Request $request, int $id): JsonResponse
+    {
+        $tenant = $this->getTenantFromRequest($request);
+        if ($tenant === null) {
+            return $this->missingTenantError();
+        }
+
+        $engagement = $this->engagementService->getEngagement($tenant, $id);
+        if ($engagement === null) {
+            return new JsonResponse(
+                ['error' => 'Engagement not found'],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        // Check engagement is in a state where results can be uploaded
+        if (!in_array($engagement->getStatus(), [
+            PartnerEngagement::STATUS_DATA_SHARED,
+            PartnerEngagement::STATUS_PROCESSING,
+            PartnerEngagement::STATUS_DELIVERED,
+        ], true)) {
+            return new JsonResponse(
+                ['error' => 'Results can only be uploaded after data has been shared'],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['outputType'])) {
+            return new JsonResponse(
+                ['error' => 'outputType is required'],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        $outputType = $data['outputType'];
+        $outputData = $data['data'] ?? [];
+        $fileUrl = $data['fileUrl'] ?? null;
+        $summary = $data['summary'] ?? null;
+
+        // Build the result payload
+        $resultPayload = [
+            'data' => $outputData,
+        ];
+
+        if ($fileUrl !== null) {
+            $resultPayload['fileUrl'] = $fileUrl;
+        }
+
+        if ($summary !== null) {
+            $resultPayload['summary'] = $summary;
+        }
+
+        try {
+            $result = $this->engagementService->recordDelivery(
+                $engagement,
+                $outputType,
+                $resultPayload
+            );
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(
+                ['error' => $e->getMessage()],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        return new JsonResponse(
+            $result,
+            $result['success'] ? Response::HTTP_CREATED : Response::HTTP_BAD_REQUEST
+        );
+    }
+
+    /**
+     * Mark a result as integrated into the BGM process.
+     */
+    #[Route('/{id}/results/{outputType}/integrate', name: 'integrate_result', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function integrateResult(Request $request, int $id, string $outputType): JsonResponse
+    {
+        $tenant = $this->getTenantFromRequest($request);
+        if ($tenant === null) {
+            return $this->missingTenantError();
+        }
+
+        $engagement = $this->engagementService->getEngagement($tenant, $id);
+        if ($engagement === null) {
+            return new JsonResponse(
+                ['error' => 'Engagement not found'],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        if (!$engagement->hasDeliveredOutput($outputType)) {
+            return new JsonResponse(
+                ['error' => "Output type '{$outputType}' has not been delivered"],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $integrationPoint = $data['integrationPoint'] ?? null;
+
+        if ($integrationPoint === null) {
+            return new JsonResponse(
+                ['error' => 'integrationPoint is required'],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        $this->engagementService->markOutputIntegrated($engagement, $outputType, $integrationPoint);
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => "Output '{$outputType}' marked as integrated at '{$integrationPoint}'",
+        ]);
+    }
+
     // ========== Aggregated Stats (for dashboard) ==========
 
     /**

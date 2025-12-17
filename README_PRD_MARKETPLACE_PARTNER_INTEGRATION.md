@@ -196,14 +196,14 @@ Two modes for different needs:
 | 1.5 | **Partner Suggestion Widget** | ✅ DONE | Show relevant partners in phase views |
 | 1.6 | **Data Grant Dialog** | ✅ DONE | UI for explicit data access approval |
 | 1.7 | **Engagement Dashboard** | ✅ DONE | List active partner engagements with status |
-| 1.8 | **Basic Result Upload** | ⬜ TODO | Partner can upload result files/JSON |
+| 1.8 | **Basic Result Upload** | ✅ DONE | Partner can upload result files/JSON |
 
 **MVP Definition of Done:**
-- [ ] User can discover partners relevant to their current phase
-- [ ] User can request quote from a partner
-- [ ] User can grant specific data access to partner
-- [ ] Partner can upload results
-- [ ] Results appear in user's engagement dashboard
+- [x] User can discover partners relevant to their current phase
+- [x] User can request quote from a partner
+- [x] User can grant specific data access to partner
+- [x] Partner can upload results
+- [x] Results appear in user's engagement dashboard
 
 ---
 
@@ -214,15 +214,15 @@ Two modes for different needs:
 |---|-------------|--------|-------|
 | 2.1 | **InterventionParticipation Entity** | ✅ DONE | Central participation records |
 | 2.2 | **Registration Flow** | ✅ DONE | Employees can sign up for interventions |
-| 2.3 | **Attendance Tracking UI** | ⬜ TODO | BGM manager marks who attended |
+| 2.3 | **Attendance Tracking UI** | ✅ DONE | BGM manager marks who attended |
 | 2.4 | **Aggregation Service** | ✅ DONE | Generate anonymous stats for partners |
 | 2.5 | **Participation Reports** | ✅ DONE | Export for insurance documentation |
 
 **Phase 2 Definition of Done:**
-- [ ] Employees can register for interventions
-- [ ] BGM manager can track attendance
-- [ ] System generates participation reports
-- [ ] Partner only sees aggregated numbers
+- [x] Employees can register for interventions
+- [x] BGM manager can track attendance
+- [x] System generates participation reports
+- [x] Partner only sees aggregated numbers
 
 ---
 
@@ -232,15 +232,15 @@ Two modes for different needs:
 | # | Deliverable | Status | Notes |
 |---|-------------|--------|-------|
 | 3.1 | **OutputTypeRegistry** | ✅ DONE | Define all result types and where they land |
-| 3.2 | **Integration Point Handlers** | ⬜ TODO | Logic to "plug in" results to correct location |
-| 3.3 | **Phase 2 Analysis Integration** | ⬜ TODO | Survey results appear in Analysis tab |
-| 3.4 | **KPI Custom Integration** | ⬜ TODO | External stats as KPI cards |
-| 3.5 | **Legal Requirements Integration** | ⬜ TODO | Gefährdungsbeurteilung auto-completion |
+| 3.2 | **Integration Point Handlers** | ✅ DONE | Logic to "plug in" results to correct location |
+| 3.3 | **Phase 2 Analysis Integration** | ✅ DONE | Survey results appear in Analysis tab |
+| 3.4 | **KPI Custom Integration** | ✅ DONE | External stats as KPI cards |
+| 3.5 | **Legal Requirements Integration** | ✅ DONE | Gefährdungsbeurteilung auto-completion |
 
 **Phase 3 Definition of Done:**
-- [ ] COPSOQ results appear in Phase 2 Analysis
-- [ ] Participation stats show as custom KPI
-- [ ] Ergonomic assessment marks legal requirement as done
+- [x] COPSOQ results appear in Phase 2 Analysis
+- [x] Participation stats show as custom KPI
+- [x] Ergonomic assessment marks legal requirement as done
 
 ---
 
