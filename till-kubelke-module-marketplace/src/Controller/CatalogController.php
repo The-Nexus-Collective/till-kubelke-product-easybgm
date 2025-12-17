@@ -71,6 +71,7 @@ class CatalogController extends AbstractController
      * - search: search term for company name/description
      * - nationwide: boolean, filter for nationwide providers
      * - remote: boolean, filter for providers offering remote services
+     * - certified: boolean, filter for providers with §20 SGB V certified offerings
      * - page: page number (default 1)
      * - limit: items per page (default 20, max 100)
      */
@@ -83,6 +84,7 @@ class CatalogController extends AbstractController
         $search = $request->query->get('search');
         $nationwideOnly = $request->query->getBoolean('nationwide', false);
         $remoteOnly = $request->query->getBoolean('remote', false);
+        $certifiedOnly = $request->query->getBoolean('certified', false);
 
         $page = max(1, $request->query->getInt('page', 1));
         $limit = min(100, max(1, $request->query->getInt('limit', 20)));
@@ -99,6 +101,7 @@ class CatalogController extends AbstractController
             search: $search,
             nationwideOnly: $nationwideOnly,
             remoteOnly: $remoteOnly,
+            certifiedOnly: $certifiedOnly,
             limit: $limit,
             offset: $offset,
         );
@@ -110,6 +113,7 @@ class CatalogController extends AbstractController
             search: $search,
             nationwideOnly: $nationwideOnly,
             remoteOnly: $remoteOnly,
+            certifiedOnly: $certifiedOnly,
         );
 
         return new JsonResponse([
@@ -126,6 +130,7 @@ class CatalogController extends AbstractController
                 'search' => $search,
                 'nationwide' => $nationwideOnly,
                 'remote' => $remoteOnly,
+                'certified' => $certifiedOnly,
             ],
         ]);
     }

@@ -29,6 +29,7 @@ class ServiceProviderRepository extends ServiceEntityRepository
         ?string $search = null,
         bool $nationwideOnly = false,
         bool $remoteOnly = false,
+        bool $certifiedOnly = false,
         int $limit = 50,
         int $offset = 0
     ): array {
@@ -66,6 +67,13 @@ class ServiceProviderRepository extends ServiceEntityRepository
                 ->setParameter('remote', true);
         }
 
+        if ($certifiedOnly) {
+            // Filter for providers with at least one certified offering (§20 SGB V)
+            $qb->innerJoin('p.offerings', 'o')
+                ->andWhere('o.isCertified = :certified')
+                ->setParameter('certified', true);
+        }
+
         return $qb->getQuery()->getResult();
     }
 
@@ -77,7 +85,8 @@ class ServiceProviderRepository extends ServiceEntityRepository
         array $tagIds = [],
         ?string $search = null,
         bool $nationwideOnly = false,
-        bool $remoteOnly = false
+        bool $remoteOnly = false,
+        bool $certifiedOnly = false
     ): int {
         $qb = $this->createQueryBuilder('p')
             ->select('COUNT(DISTINCT p.id)')
@@ -109,6 +118,13 @@ class ServiceProviderRepository extends ServiceEntityRepository
         if ($remoteOnly) {
             $qb->andWhere('p.offersRemote = :remote')
                 ->setParameter('remote', true);
+        }
+
+        if ($certifiedOnly) {
+            // Filter for providers with at least one certified offering (§20 SGB V)
+            $qb->innerJoin('p.offerings', 'o')
+                ->andWhere('o.isCertified = :certified')
+                ->setParameter('certified', true);
         }
 
         return (int) $qb->getQuery()->getSingleScalarResult();
