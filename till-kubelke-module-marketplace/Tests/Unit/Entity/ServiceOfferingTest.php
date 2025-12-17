@@ -145,6 +145,160 @@ class ServiceOfferingTest extends TestCase
         $offering->setSortOrder(5);
         $this->assertEquals(5, $offering->getSortOrder());
     }
+
+    // ========== Partner Integration Field Tests ==========
+
+    public function testRequiredDataScopes(): void
+    {
+        $offering = new ServiceOffering();
+        $scopes = ['employee_list', 'goals', 'survey_results'];
+
+        $offering->setRequiredDataScopes($scopes);
+
+        $this->assertEquals($scopes, $offering->getRequiredDataScopes());
+    }
+
+    public function testRequiresDataScope(): void
+    {
+        $offering = new ServiceOffering();
+        $offering->setRequiredDataScopes(['employee_list', 'goals']);
+
+        $this->assertTrue($offering->requiresDataScope('employee_list'));
+        $this->assertTrue($offering->requiresDataScope('goals'));
+        $this->assertFalse($offering->requiresDataScope('survey_results'));
+    }
+
+    public function testRequiresDataScopeWithNullScopes(): void
+    {
+        $offering = new ServiceOffering();
+
+        $this->assertFalse($offering->requiresDataScope('employee_list'));
+    }
+
+    public function testOutputDataTypes(): void
+    {
+        $offering = new ServiceOffering();
+        $types = ['copsoq_analysis', 'intervention_plan'];
+
+        $offering->setOutputDataTypes($types);
+
+        $this->assertEquals($types, $offering->getOutputDataTypes());
+    }
+
+    public function testDeliversOutputType(): void
+    {
+        $offering = new ServiceOffering();
+        $offering->setOutputDataTypes(['copsoq_analysis', 'health_report']);
+
+        $this->assertTrue($offering->deliversOutputType('copsoq_analysis'));
+        $this->assertTrue($offering->deliversOutputType('health_report'));
+        $this->assertFalse($offering->deliversOutputType('intervention_plan'));
+    }
+
+    public function testDeliversOutputTypeWithNullTypes(): void
+    {
+        $offering = new ServiceOffering();
+
+        $this->assertFalse($offering->deliversOutputType('copsoq_analysis'));
+    }
+
+    public function testIntegrationPoints(): void
+    {
+        $offering = new ServiceOffering();
+        $points = ['phase_2.analysis', 'kpi.custom'];
+
+        $offering->setIntegrationPoints($points);
+
+        $this->assertEquals($points, $offering->getIntegrationPoints());
+    }
+
+    public function testIntegratesAt(): void
+    {
+        $offering = new ServiceOffering();
+        $offering->setIntegrationPoints(['phase_2.analysis', 'kpi.custom']);
+
+        $this->assertTrue($offering->integratesAt('phase_2.analysis'));
+        $this->assertTrue($offering->integratesAt('kpi.custom'));
+        $this->assertFalse($offering->integratesAt('phase_3.concept'));
+    }
+
+    public function testIntegratesAtWithNullPoints(): void
+    {
+        $offering = new ServiceOffering();
+
+        $this->assertFalse($offering->integratesAt('phase_2.analysis'));
+    }
+
+    public function testRelevantPhases(): void
+    {
+        $offering = new ServiceOffering();
+        $phases = [2, 3, 4];
+
+        $offering->setRelevantPhases($phases);
+
+        $this->assertEquals($phases, $offering->getRelevantPhases());
+    }
+
+    public function testIsRelevantForPhase(): void
+    {
+        $offering = new ServiceOffering();
+        $offering->setRelevantPhases([2, 3, 4]);
+
+        $this->assertFalse($offering->isRelevantForPhase(1));
+        $this->assertTrue($offering->isRelevantForPhase(2));
+        $this->assertTrue($offering->isRelevantForPhase(3));
+        $this->assertTrue($offering->isRelevantForPhase(4));
+        $this->assertFalse($offering->isRelevantForPhase(5));
+        $this->assertFalse($offering->isRelevantForPhase(6));
+    }
+
+    public function testIsRelevantForPhaseWithNullPhases(): void
+    {
+        $offering = new ServiceOffering();
+
+        $this->assertFalse($offering->isRelevantForPhase(2));
+    }
+
+    public function testDefaultIsOrchestratorServiceFalse(): void
+    {
+        $offering = new ServiceOffering();
+
+        $this->assertFalse($offering->isOrchestratorService());
+    }
+
+    public function testSetIsOrchestratorService(): void
+    {
+        $offering = new ServiceOffering();
+        $offering->setIsOrchestratorService(true);
+
+        $this->assertTrue($offering->isOrchestratorService());
+    }
+
+    public function testToArrayIncludesPartnerIntegrationFields(): void
+    {
+        $offering = new ServiceOffering();
+        $offering->setTitle('COPSOQ Survey');
+        $offering->setDescription('Full COPSOQ analysis');
+        $offering->setRequiredDataScopes(['employee_emails', 'goals']);
+        $offering->setOutputDataTypes(['copsoq_analysis']);
+        $offering->setIntegrationPoints(['phase_2.analysis']);
+        $offering->setRelevantPhases([2, 3]);
+        $offering->setIsOrchestratorService(false);
+
+        $array = $offering->toArray();
+
+        $this->assertArrayHasKey('requiredDataScopes', $array);
+        $this->assertArrayHasKey('outputDataTypes', $array);
+        $this->assertArrayHasKey('integrationPoints', $array);
+        $this->assertArrayHasKey('relevantPhases', $array);
+        $this->assertArrayHasKey('isOrchestratorService', $array);
+
+        $this->assertEquals(['employee_emails', 'goals'], $array['requiredDataScopes']);
+        $this->assertEquals(['copsoq_analysis'], $array['outputDataTypes']);
+        $this->assertEquals(['phase_2.analysis'], $array['integrationPoints']);
+        $this->assertEquals([2, 3], $array['relevantPhases']);
+        $this->assertFalse($array['isOrchestratorService']);
+    }
 }
 
 
