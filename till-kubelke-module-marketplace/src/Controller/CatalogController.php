@@ -232,6 +232,205 @@ class CatalogController extends AbstractController
     }
 
     /**
+     * Browse all active offerings from approved providers.
+     * Returns offerings with provider info - ideal for intervention planning.
+     * 
+     * Query parameters:
+     * - phases: comma-separated phase numbers to filter by (e.g., "3,4")
+     * - categories: comma-separated category IDs or slugs
+     * - certified: boolean, filter for §20 certified offerings only
+     * - search: search term for offering title/description
+     * - limit: max results (default 50)
+     */
+    #[Route('/offerings', name: 'offerings', methods: ['GET'])]
+    public function browseOfferings(Request $request): JsonResponse
+    {
+        $phasesParam = $request->query->get('phases', '');
+        $categoriesParam = $request->query->get('categories', '');
+        $certifiedOnly = $request->query->getBoolean('certified', false);
+        $search = $request->query->get('search');
+        $limit = min(100, max(1, $request->query->getInt('limit', 50)));
+
+        // Parse phases
+        $phases = [];
+        if ($phasesParam !== '') {
+            $phases = array_filter(array_map('intval', explode(',', $phasesParam)));
+        }
+
+        // Parse category IDs
+        $categoryIds = $this->parseFilterParam($categoriesParam, 'category');
+
+        // Get all approved providers
+        $providers = $this->providerRepository->findApprovedProviders(
+            categoryIds: $categoryIds,
+            limit: 500, // Get more providers to have enough offerings
+            offset: 0,
+        );
+
+        // Collect offerings with provider info
+        $offerings = [];
+        foreach ($providers as $provider) {
+            foreach ($provider->getOfferings() as $offering) {
+                // Skip inactive offerings
+                if (!$offering->isActive()) {
+                    continue;
+                }
+
+                // Filter by certified
+                if ($certifiedOnly && !$offering->isCertified()) {
+                    continue;
+                }
+
+                // Filter by phases (check if offering's provider has relevant phases)
+                if (!empty($phases)) {
+                    $relevantPhases = $provider->getRelevantPhases();
+                    $hasMatchingPhase = false;
+                    foreach ($phases as $phase) {
+                        if (in_array($phase, $relevantPhases)) {
+                            $hasMatchingPhase = true;
+                            break;
+                        }
+                    }
+                    if (!$hasMatchingPhase) {
+                        continue;
+                    }
+                }
+
+                // Filter by search
+                if ($search !== null && $search !== '') {
+                    $searchLower = strtolower($search);
+                    $titleMatch = str_contains(strtolower($offering->getTitle()), $searchLower);
+                    $descMatch = str_contains(strtolower($offering->getDescription() ?? ''), $searchLower);
+                    $providerMatch = str_contains(strtolower($provider->getCompanyName()), $searchLower);
+                    if (!$titleMatch && !$descMatch && !$providerMatch) {
+                        continue;
+                    }
+                }
+
+                $offerings[] = [
+                    'offering' => $offering->toArray(),
+                    'provider' => [
+                        'id' => $provider->getId(),
+                        'companyName' => $provider->getCompanyName(),
+                        'logoUrl' => $provider->getLogoUrl(),
+                        'isPremium' => $provider->isPremium(),
+                        'isNationwide' => $provider->isNationwide(),
+                        'offersRemote' => $provider->offersRemote(),
+                        'categories' => array_map(fn($c) => [
+                            'id' => $c->getId(),
+                            'name' => $c->getName(),
+                            'slug' => $c->getSlug(),
+                        ], $provider->getCategories()->toArray()),
+                    ],
+                ];
+
+                // Limit offerings
+                if (count($offerings) >= $limit) {
+                    break 2; // Break out of both loops
+                }
+            }
+        }
+
+        return new JsonResponse([
+            'offerings' => $offerings,
+            'total' => count($offerings),
+            'filters' => [
+                'phases' => $phases,
+                'categories' => $categoryIds,
+                'certified' => $certifiedOnly,
+                'search' => $search,
+            ],
+        ]);
+    }
+
+    /**
+     * Find offerings that match specific integration points.
+     * This is used to show relevant offerings for legal requirements, analyses, etc.
+     * 
+     * Query parameters:
+     * - integrationPoints: comma-separated integration points (e.g., "legal.gefaehrdungsbeurteilung,phase_2.analysis")
+     * - outputTypes: comma-separated output types (e.g., "copsoq_analysis,gbpsych_assessment")
+     * - limit: max results (default 20)
+     */
+    #[Route('/offerings/by-integration', name: 'offerings_by_integration', methods: ['GET'])]
+    public function getOfferingsByIntegration(Request $request): JsonResponse
+    {
+        $integrationPointsParam = $request->query->get('integrationPoints', '');
+        $outputTypesParam = $request->query->get('outputTypes', '');
+        $limit = min(50, max(1, $request->query->getInt('limit', 20)));
+
+        // Parse parameters
+        $integrationPoints = array_filter(array_map('trim', explode(',', $integrationPointsParam)));
+        $outputTypes = array_filter(array_map('trim', explode(',', $outputTypesParam)));
+
+        if (empty($integrationPoints) && empty($outputTypes)) {
+            return new JsonResponse([
+                'error' => 'At least one of integrationPoints or outputTypes is required',
+            ], 400);
+        }
+
+        // Get all approved providers with their offerings
+        $providers = $this->providerRepository->findApprovedProviders(limit: 500, offset: 0);
+
+        // Collect matching offerings with full details
+        $matchingOfferings = [];
+        foreach ($providers as $provider) {
+            foreach ($provider->getOfferings() as $offering) {
+                if (!$offering->isActive()) {
+                    continue;
+                }
+
+                $offeringIntegrationPoints = $offering->getIntegrationPoints() ?? [];
+                $offeringOutputTypes = $offering->getOutputDataTypes() ?? [];
+
+                // Check if offering matches any requested integration point
+                $matchesIntegration = empty($integrationPoints) || 
+                    !empty(array_intersect($integrationPoints, $offeringIntegrationPoints));
+
+                // Check if offering matches any requested output type
+                $matchesOutput = empty($outputTypes) || 
+                    !empty(array_intersect($outputTypes, $offeringOutputTypes));
+
+                // Must match at least one criterion
+                if ($matchesIntegration || $matchesOutput) {
+                    $matchingOfferings[] = [
+                        'offering' => array_merge($offering->toArray(), [
+                            // Include matched criteria for frontend highlighting
+                            'matchedIntegrationPoints' => array_values(array_intersect($integrationPoints, $offeringIntegrationPoints)),
+                            'matchedOutputTypes' => array_values(array_intersect($outputTypes, $offeringOutputTypes)),
+                        ]),
+                        'provider' => [
+                            'id' => $provider->getId(),
+                            'companyName' => $provider->getCompanyName(),
+                            'shortDescription' => $provider->getShortDescription(),
+                            'logoUrl' => $provider->getLogoUrl(),
+                            'isPremium' => $provider->isPremium(),
+                            'isNationwide' => $provider->isNationwide(),
+                            'offersRemote' => $provider->offersRemote(),
+                            'website' => $provider->getWebsite(),
+                            'averageRating' => null, // Could be populated from reviews
+                            'reviewCount' => null,
+                        ],
+                    ];
+
+                    if (count($matchingOfferings) >= $limit) {
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        return new JsonResponse([
+            'offerings' => $matchingOfferings,
+            'total' => count($matchingOfferings),
+            'filters' => [
+                'integrationPoints' => $integrationPoints,
+                'outputTypes' => $outputTypes,
+            ],
+        ]);
+    }
+
+    /**
      * Parse comma-separated filter parameter (supports IDs or slugs).
      *
      * @return int[]

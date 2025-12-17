@@ -136,6 +136,23 @@ class ServiceProvider
     #[ORM\OneToMany(mappedBy: 'provider', targetEntity: ServiceInquiry::class)]
     private Collection $inquiries;
 
+    // ========== Cached Rating Stats (set externally) ==========
+    
+    /**
+     * Cached average rating (not persisted, set by service).
+     */
+    private ?float $cachedAverageRating = null;
+
+    /**
+     * Cached review count (not persisted, set by service).
+     */
+    private ?int $cachedReviewCount = null;
+
+    /**
+     * Cached recommend rate (not persisted, set by service).
+     */
+    private ?int $cachedRecommendRate = null;
+
     public function __construct()
     {
         $this->categories = new ArrayCollection();
@@ -521,6 +538,41 @@ class ServiceProvider
         return array_unique($names);
     }
 
+    // ========== Rating Stats (cached, set externally) ==========
+
+    public function getCachedAverageRating(): ?float
+    {
+        return $this->cachedAverageRating;
+    }
+
+    public function setCachedAverageRating(?float $rating): static
+    {
+        $this->cachedAverageRating = $rating;
+        return $this;
+    }
+
+    public function getCachedReviewCount(): ?int
+    {
+        return $this->cachedReviewCount;
+    }
+
+    public function setCachedReviewCount(?int $count): static
+    {
+        $this->cachedReviewCount = $count;
+        return $this;
+    }
+
+    public function getCachedRecommendRate(): ?int
+    {
+        return $this->cachedRecommendRate;
+    }
+
+    public function setCachedRecommendRate(?int $rate): static
+    {
+        $this->cachedRecommendRate = $rate;
+        return $this;
+    }
+
     public function toArray(bool $includeDetails = false): array
     {
         $data = [
@@ -541,6 +593,10 @@ class ServiceProvider
             'relevantPhases' => $this->getRelevantPhases(),
             'hasCertifiedOfferings' => $this->hasCertifiedOfferings(),
             'certifications' => $this->getCertificationNames(),
+            // Rating stats (populated externally)
+            'averageRating' => $this->cachedAverageRating,
+            'reviewCount' => $this->cachedReviewCount,
+            'recommendRate' => $this->cachedRecommendRate,
         ];
 
         if ($includeDetails) {
