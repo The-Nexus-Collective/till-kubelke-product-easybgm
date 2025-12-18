@@ -236,3 +236,4 @@ class OutputTypeRegistryTest extends TestCase
     }
 }
 
+
