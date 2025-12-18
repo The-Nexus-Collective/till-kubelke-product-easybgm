@@ -21,10 +21,33 @@ alwaysApply: true
 │  │  Survey  │ │   Chat   │ │ AI Buddy │ │    HR    │               │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘               │
 ├─────────────────────────────────────────────────────────────────────┤
-│  LAYER 1: PLATFORM FOUNDATION                                       │
-│  Auth │ Tenant │ Billing │ Notifications │ Settings │ Encryption   │
+│  LAYER 1: PLATFORM FOUNDATION (Best Practice Basis)                 │
+│  Auth │ Tenant │ Geo │ Billing │ Notifications │ Settings          │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+## 💡 Foundation = Best Practice Basis (NICHT minimal!)
+
+Foundation ist **kein minimalistisches Skelett**, sondern eine **vollständige, erprobte Basis** für professionelle SaaS-Anwendungen:
+
+| Aspekt | Bedeutung |
+|--------|-----------|
+| **Vollständig** | User mit Avatar, OAuth, AI-Config - alles was jedes Produkt braucht |
+| **Best Practice** | Bewährte Patterns aus der Praxis, nicht theoretisch minimal |
+| **Produktionsreif** | Multi-Tenancy, Billing, Notifications - alles von Anfang an |
+| **Wiederverwendbar** | Produkte erben eine solide Basis, kein Rad neu erfinden |
+
+**Beispiel User-Entity:**
+```php
+// Foundation User hat ALLES was Produkte brauchen:
+- id, email, password, firstName, lastName (Basis)
+- avatar (Profil)
+- googleId, appleId (OAuth)
+- isAiAgent, skills, geminiModel (AI-Features)
+- isActive, createdAt, updatedAt (Status)
+```
+
+**Regel:** Wenn ein Feature in MEHREREN Produkten gebraucht wird → gehört es in Foundation.
 
 ## 🔗 Dependency Rules (WICHTIG!)
 

@@ -22,6 +22,7 @@ class ServiceProviderRepository extends ServiceEntityRepository
      *
      * @param array<string> $categoryIds
      * @param array<string> $tagIds
+     * @param string|null $marketCode Filter by market code (e.g., 'DE', 'AT', 'CH')
      */
     public function findApprovedProviders(
         array $categoryIds = [],
@@ -30,6 +31,7 @@ class ServiceProviderRepository extends ServiceEntityRepository
         bool $nationwideOnly = false,
         bool $remoteOnly = false,
         bool $certifiedOnly = false,
+        ?string $marketCode = null,
         int $limit = 50,
         int $offset = 0
     ): array {
@@ -74,11 +76,20 @@ class ServiceProviderRepository extends ServiceEntityRepository
                 ->setParameter('certified', true);
         }
 
+        if ($marketCode !== null && $marketCode !== '') {
+            // Filter by market - provider must operate in this market
+            $qb->innerJoin('p.markets', 'm')
+                ->andWhere('m.code = :marketCode')
+                ->setParameter('marketCode', strtoupper($marketCode));
+        }
+
         return $qb->getQuery()->getResult();
     }
 
     /**
      * Count approved providers with optional filters.
+     * 
+     * @param string|null $marketCode Filter by market code (e.g., 'DE', 'AT', 'CH')
      */
     public function countApprovedProviders(
         array $categoryIds = [],
@@ -86,7 +97,8 @@ class ServiceProviderRepository extends ServiceEntityRepository
         ?string $search = null,
         bool $nationwideOnly = false,
         bool $remoteOnly = false,
-        bool $certifiedOnly = false
+        bool $certifiedOnly = false,
+        ?string $marketCode = null
     ): int {
         $qb = $this->createQueryBuilder('p')
             ->select('COUNT(DISTINCT p.id)')
@@ -125,6 +137,13 @@ class ServiceProviderRepository extends ServiceEntityRepository
             $qb->innerJoin('p.offerings', 'o')
                 ->andWhere('o.isCertified = :certified')
                 ->setParameter('certified', true);
+        }
+
+        if ($marketCode !== null && $marketCode !== '') {
+            // Filter by market - provider must operate in this market
+            $qb->innerJoin('p.markets', 'm')
+                ->andWhere('m.code = :marketCode')
+                ->setParameter('marketCode', strtoupper($marketCode));
         }
 
         return (int) $qb->getQuery()->getSingleScalarResult();

@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use TillKubelke\ModuleMarketplace\Repository\ServiceProviderRepository;
 use TillKubelke\PlatformFoundation\Auth\Entity\User;
+use TillKubelke\PlatformFoundation\Geo\Entity\Market;
 
 /**
  * ServiceProvider Entity - BGM service provider companies.
@@ -136,6 +137,16 @@ class ServiceProvider
     #[ORM\OneToMany(mappedBy: 'provider', targetEntity: ServiceInquiry::class)]
     private Collection $inquiries;
 
+    /**
+     * Markets where this provider offers services (country-level).
+     * This is different from serviceRegions which are sub-regions within a country (e.g., German Bundesländer).
+     * 
+     * @var Collection<int, Market>
+     */
+    #[ORM\ManyToMany(targetEntity: Market::class)]
+    #[ORM\JoinTable(name: 'marketplace_provider_markets')]
+    private Collection $markets;
+
     // ========== Cached Rating Stats (set externally) ==========
     
     /**
@@ -159,6 +170,7 @@ class ServiceProvider
         $this->tags = new ArrayCollection();
         $this->offerings = new ArrayCollection();
         $this->inquiries = new ArrayCollection();
+        $this->markets = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -490,6 +502,65 @@ class ServiceProvider
         return $this->inquiries;
     }
 
+    // ========== Markets (Country-level) ==========
+
+    /**
+     * Get all markets where this provider operates.
+     * 
+     * @return Collection<int, Market>
+     */
+    public function getMarkets(): Collection
+    {
+        return $this->markets;
+    }
+
+    /**
+     * Add a market where this provider operates.
+     */
+    public function addMarket(Market $market): static
+    {
+        if (!$this->markets->contains($market)) {
+            $this->markets->add($market);
+        }
+        return $this;
+    }
+
+    /**
+     * Remove a market from this provider.
+     */
+    public function removeMarket(Market $market): static
+    {
+        $this->markets->removeElement($market);
+        return $this;
+    }
+
+    /**
+     * Check if this provider operates in a specific market.
+     */
+    public function operatesInMarket(string $marketCode): bool
+    {
+        $marketCode = strtoupper($marketCode);
+        foreach ($this->markets as $market) {
+            if ($market->getCode() === $marketCode) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get all market codes as an array.
+     * 
+     * @return string[]
+     */
+    public function getMarketCodes(): array
+    {
+        return array_map(
+            fn(Market $m) => $m->getCode(),
+            $this->markets->toArray()
+        );
+    }
+
     // ========== Computed Properties ==========
 
     /**
@@ -588,6 +659,8 @@ class ServiceProvider
             'isPremium' => $this->isPremium,
             'categories' => array_map(fn(Category $c) => $c->toArray(), $this->categories->toArray()),
             'tags' => array_map(fn(Tag $t) => $t->toArray(), $this->tags->toArray()),
+            'markets' => array_map(fn(Market $m) => $m->toArray(), $this->markets->toArray()),
+            'marketCodes' => $this->getMarketCodes(),
             'createdAt' => $this->createdAt?->format('c'),
             // Computed properties for card display
             'relevantPhases' => $this->getRelevantPhases(),

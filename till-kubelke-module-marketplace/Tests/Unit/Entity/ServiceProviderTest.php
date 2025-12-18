@@ -7,6 +7,7 @@ use TillKubelke\ModuleMarketplace\Entity\Category;
 use TillKubelke\ModuleMarketplace\Entity\ServiceProvider;
 use TillKubelke\ModuleMarketplace\Entity\Tag;
 use TillKubelke\PlatformFoundation\Auth\Entity\User;
+use TillKubelke\PlatformFoundation\Geo\Entity\Market;
 
 /**
  * Unit tests for ServiceProvider entity.
@@ -183,8 +184,7 @@ class ServiceProviderTest extends TestCase
     public function testSetOwner(): void
     {
         $provider = new ServiceProvider();
-        $user = new User();
-        $user->setEmail('test@example.com');
+        $user = new User('test@example.com');
         $user->setFirstName('Test');
         $user->setLastName('User');
         
@@ -203,7 +203,7 @@ class ServiceProviderTest extends TestCase
     public function testIsOwnedByReturnsFalseWhenNoOwner(): void
     {
         $provider = new ServiceProvider();
-        $user = new User();
+        $user = new User('test@example.com');
         
         $reflection = new \ReflectionClass($user);
         $idProperty = $reflection->getProperty('id');
@@ -218,13 +218,13 @@ class ServiceProviderTest extends TestCase
     {
         $provider = new ServiceProvider();
         
-        $owner = new User();
+        $owner = new User('owner@example.com');
         $reflection = new \ReflectionClass($owner);
         $idProperty = $reflection->getProperty('id');
         $idProperty->setAccessible(true);
         $idProperty->setValue($owner, 123);
         
-        $otherUser = new User();
+        $otherUser = new User('other@example.com');
         $idProperty->setValue($otherUser, 456);
 
         $provider->setOwner($owner);
@@ -240,7 +240,7 @@ class ServiceProviderTest extends TestCase
         $provider->setContactEmail('test@example.com');
         $provider->setDescription('Test description with at least 50 characters for validation purposes.');
 
-        $user = new User();
+        $user = new User('test@example.com');
         $reflection = new \ReflectionClass($user);
         $idProperty = $reflection->getProperty('id');
         $idProperty->setAccessible(true);
@@ -252,6 +252,112 @@ class ServiceProviderTest extends TestCase
 
         $this->assertArrayHasKey('ownerId', $array);
         $this->assertEquals(789, $array['ownerId']);
+    }
+
+    // ========== Market Tests ==========
+
+    public function testAddMarket(): void
+    {
+        $provider = new ServiceProvider();
+        $market = new Market('DE', 'Germany', 'EUR', 'de_DE');
+
+        $provider->addMarket($market);
+
+        $this->assertCount(1, $provider->getMarkets());
+        $this->assertTrue($provider->getMarkets()->contains($market));
+    }
+
+    public function testAddMarketDoesNotDuplicate(): void
+    {
+        $provider = new ServiceProvider();
+        $market = new Market('DE', 'Germany', 'EUR', 'de_DE');
+
+        $provider->addMarket($market);
+        $provider->addMarket($market); // Add again
+
+        $this->assertCount(1, $provider->getMarkets());
+    }
+
+    public function testAddMultipleMarkets(): void
+    {
+        $provider = new ServiceProvider();
+        $de = new Market('DE', 'Germany', 'EUR', 'de_DE');
+        $at = new Market('AT', 'Austria', 'EUR', 'de_AT');
+        $ch = new Market('CH', 'Switzerland', 'CHF', 'de_CH');
+
+        $provider->addMarket($de);
+        $provider->addMarket($at);
+        $provider->addMarket($ch);
+
+        $this->assertCount(3, $provider->getMarkets());
+    }
+
+    public function testRemoveMarket(): void
+    {
+        $provider = new ServiceProvider();
+        $market = new Market('DE', 'Germany', 'EUR', 'de_DE');
+
+        $provider->addMarket($market);
+        $provider->removeMarket($market);
+
+        $this->assertCount(0, $provider->getMarkets());
+    }
+
+    public function testOperatesInMarket(): void
+    {
+        $provider = new ServiceProvider();
+        $de = new Market('DE', 'Germany', 'EUR', 'de_DE');
+        $at = new Market('AT', 'Austria', 'EUR', 'de_AT');
+
+        $provider->addMarket($de);
+        $provider->addMarket($at);
+
+        $this->assertTrue($provider->operatesInMarket('DE'));
+        $this->assertTrue($provider->operatesInMarket('de')); // Case-insensitive
+        $this->assertTrue($provider->operatesInMarket('AT'));
+        $this->assertFalse($provider->operatesInMarket('CH'));
+    }
+
+    public function testGetMarketCodes(): void
+    {
+        $provider = new ServiceProvider();
+        $de = new Market('DE', 'Germany', 'EUR', 'de_DE');
+        $at = new Market('AT', 'Austria', 'EUR', 'de_AT');
+
+        $provider->addMarket($de);
+        $provider->addMarket($at);
+
+        $codes = $provider->getMarketCodes();
+
+        $this->assertCount(2, $codes);
+        $this->assertContains('DE', $codes);
+        $this->assertContains('AT', $codes);
+    }
+
+    public function testToArrayIncludesMarkets(): void
+    {
+        $provider = new ServiceProvider();
+        $provider->setCompanyName('Test Provider');
+        $provider->setContactEmail('test@example.com');
+        $provider->setDescription('Test description with at least 50 characters for validation purposes.');
+
+        $de = new Market('DE', 'Germany', 'EUR', 'de_DE');
+        $provider->addMarket($de);
+
+        $array = $provider->toArray();
+
+        $this->assertArrayHasKey('markets', $array);
+        $this->assertArrayHasKey('marketCodes', $array);
+        $this->assertCount(1, $array['markets']);
+        $this->assertContains('DE', $array['marketCodes']);
+    }
+
+    public function testNewProviderHasEmptyMarkets(): void
+    {
+        $provider = new ServiceProvider();
+
+        $this->assertCount(0, $provider->getMarkets());
+        $this->assertEmpty($provider->getMarketCodes());
     }
 }
 

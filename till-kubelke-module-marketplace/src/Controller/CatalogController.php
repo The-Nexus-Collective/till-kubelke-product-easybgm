@@ -72,6 +72,7 @@ class CatalogController extends AbstractController
      * - nationwide: boolean, filter for nationwide providers
      * - remote: boolean, filter for providers offering remote services
      * - certified: boolean, filter for providers with §20 SGB V certified offerings
+     * - market: market code (e.g., 'DE', 'AT', 'CH') to filter providers operating in that market
      * - page: page number (default 1)
      * - limit: items per page (default 20, max 100)
      */
@@ -85,6 +86,7 @@ class CatalogController extends AbstractController
         $nationwideOnly = $request->query->getBoolean('nationwide', false);
         $remoteOnly = $request->query->getBoolean('remote', false);
         $certifiedOnly = $request->query->getBoolean('certified', false);
+        $marketCode = $request->query->get('market');
 
         $page = max(1, $request->query->getInt('page', 1));
         $limit = min(100, max(1, $request->query->getInt('limit', 20)));
@@ -102,6 +104,7 @@ class CatalogController extends AbstractController
             nationwideOnly: $nationwideOnly,
             remoteOnly: $remoteOnly,
             certifiedOnly: $certifiedOnly,
+            marketCode: $marketCode,
             limit: $limit,
             offset: $offset,
         );
@@ -114,6 +117,7 @@ class CatalogController extends AbstractController
             nationwideOnly: $nationwideOnly,
             remoteOnly: $remoteOnly,
             certifiedOnly: $certifiedOnly,
+            marketCode: $marketCode,
         );
 
         return new JsonResponse([
@@ -131,6 +135,7 @@ class CatalogController extends AbstractController
                 'nationwide' => $nationwideOnly,
                 'remote' => $remoteOnly,
                 'certified' => $certifiedOnly,
+                'market' => $marketCode,
             ],
         ]);
     }
