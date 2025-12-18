@@ -144,7 +144,11 @@ class ServiceProvider
      * @var Collection<int, Market>
      */
     #[ORM\ManyToMany(targetEntity: Market::class)]
-    #[ORM\JoinTable(name: 'marketplace_provider_markets')]
+    #[ORM\JoinTable(
+        name: 'marketplace_provider_markets',
+        joinColumns: [new ORM\JoinColumn(name: 'provider_id', referencedColumnName: 'id')],
+        inverseJoinColumns: [new ORM\JoinColumn(name: 'market_code', referencedColumnName: 'code')]
+    )]
     private Collection $markets;
 
     // ========== Cached Rating Stats (set externally) ==========
