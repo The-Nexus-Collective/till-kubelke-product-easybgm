@@ -10,7 +10,7 @@ till-kubelke-product-easybgm-backend/
 till-kubelke-product-easybgm-frontend/
 
 # Local development tools (not for PROD)
-till-kubelke-deployment-dashboard/
+till-kubelke-module-deployment-dashboard/
 
 # Ignore temporary files
 *.pid
