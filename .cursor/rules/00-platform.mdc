@@ -49,6 +49,76 @@ Foundation ist **kein minimalistisches Skelett**, sondern eine **vollständige, 
 
 **Regel:** Wenn ein Feature in MEHREREN Produkten gebraucht wird → gehört es in Foundation.
 
+## 🏗️ GOLDENE ARCHITEKTUR-REGEL: Generisch + Erweiterung
+
+> **Foundation/Module = Generische Basisversion**
+> **Product = Erbt, erweitert, überschreibt sauber**
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  FOUNDATION (platform-ui)                                           │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  DashboardLayout (generisch)                                 │   │
+│  │  - Sidebar, Header, Content Area                             │   │
+│  │  - navItems als PROP (nicht hardcoded!)                      │   │
+│  │  - Slots für Product-spezifische Erweiterungen               │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+├─────────────────────────────────────────────────────────────────────┤
+│  PRODUCT (EasyBGM)                                                  │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  extends DashboardLayout                                     │   │
+│  │  - navConfig mit BGM-spezifischer Navigation                 │   │
+│  │  - BGM-spezifische Hooks (useBgmStatus, etc.)                │   │
+│  │  - Überschreibt/erweitert nur was nötig ist                  │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Konkrete Regeln:**
+
+| Was | Foundation | Product |
+|-----|------------|---------|
+| **Layouts** | Generisches Skelett mit Slots | Füllt Slots, konfiguriert |
+| **Navigation** | `navItems` als Prop/Config | Definiert eigene navItems |
+| **Hooks** | Generische (useAuth, useSubscription) | Produkt-spezifische (useBgmStatus) |
+| **Components** | Wiederverwendbare UI-Primitive | Produkt-spezifische Zusammenstellungen |
+| **Theme** | Basis-Theme mit Variablen | Überschreibt Farben/Schriften |
+
+**NIEMALS in Foundation:**
+- Produkt-spezifische Navigation (BGM-Phasen)
+- Produkt-spezifische Hooks (useBgmStatus, useCopsoq)
+- Hardcodierte Pfade zu Produkt-Features
+- Produkt-spezifische Texte/Übersetzungen
+
+**Pattern für Erweiterung:**
+```tsx
+// Foundation: Generisches Layout
+export function DashboardLayout({ navItems, children, slots }: DashboardLayoutProps) {
+  return (
+    <LayoutShell>
+      <Sidebar navItems={navItems} />
+      {slots?.header}
+      <Content>{children}</Content>
+    </LayoutShell>
+  );
+}
+
+// Product: Konfiguriert das Layout
+import { DashboardLayout } from '@till-kubelke/platform-ui';
+import { bgmNavItems } from './nav-config';
+
+export function EasyBgmLayout({ children }) {
+  return (
+    <DashboardLayout 
+      navItems={bgmNavItems}
+      slots={{ header: <BgmProgressHeader /> }}
+    >
+      {children}
+    </DashboardLayout>
+  );
+}
+```
+
 ## 🔗 Dependency Rules (WICHTIG!)
 
 ```

@@ -8,6 +8,8 @@ set -e
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKEND_DIR="$BASE_DIR/till-kubelke-product-easybgm-backend"
 FRONTEND_DIR="$BASE_DIR/till-kubelke-product-easybgm-frontend"
+ADMIN_DIR="$BASE_DIR/till-kubelke-product-admin-frontend"
+DASHBOARD_DIR="$BASE_DIR/till-kubelke-module-deployment-dashboard"
 
 # Add symfony and composer to PATH
 export PATH="$HOME/.symfony5/bin:/opt/homebrew/bin:$PATH"
@@ -34,6 +36,7 @@ print_usage() {
     echo ""
     echo -e "${YELLOW}Commands:${NC}"
     echo "  start         Start all services (Docker + Backend + Frontend)"
+    echo "  start-all     Start ALL including Deployment Dashboard"
     echo "  stop          Stop all services"
     echo "  restart       Restart all services"
     echo ""
@@ -44,6 +47,7 @@ print_usage() {
     echo "  frontend      Start Vite frontend only"
     echo ""
     echo "  dashboard     Start Deployment Dashboard (http://localhost:3333)"
+    echo "  admin         Start Super Admin Portal (http://localhost:9000)"
     echo ""
     echo "  test          Run all tests"
     echo "  test-backend  Run PHPUnit tests"
@@ -177,6 +181,62 @@ start_all() {
     FRONTEND_PID=$!
     echo $FRONTEND_PID > "$BASE_DIR/.frontend.pid"
     
+    print_running_services
+    
+    wait $FRONTEND_PID
+}
+
+start_all_with_dashboard() {
+    print_header
+    
+    # Start Docker
+    start_docker
+    
+    # Start Dashboard in background first
+    start_dashboard_background
+    
+    # Start Admin Portal in background
+    start_admin_background
+    
+    # Open Dashboard in browser
+    open http://localhost:3333 2>/dev/null || xdg-open http://localhost:3333 2>/dev/null || true
+    
+    # Start backend in background
+    echo ""
+    echo -e "${BLUE}🐘 Starting Symfony backend in background...${NC}"
+    cd "$BACKEND_DIR"
+    
+    if [ ! -d "vendor" ]; then
+        composer install
+    fi
+    
+    # Wait for PostgreSQL
+    until docker exec easybgm-postgres pg_isready -U app -d app 2>/dev/null; do
+        sleep 1
+    done
+    
+    php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true
+    symfony server:start --no-tls --port=8000 -d
+    
+    # Start frontend in background
+    echo ""
+    echo -e "${BLUE}⚛️  Starting Vite frontend in background...${NC}"
+    cd "$FRONTEND_DIR"
+    
+    if [ ! -d "node_modules" ]; then
+        npm install
+    fi
+    
+    npm run dev &
+    FRONTEND_PID=$!
+    echo $FRONTEND_PID > "$BASE_DIR/.frontend.pid"
+    
+    print_running_services_with_dashboard
+    
+    wait $FRONTEND_PID
+}
+
+print_running_services() {
     echo ""
     echo -e "${GREEN}═══════════════════════════════════════════════════════════════════════════${NC}"
     echo -e "${GREEN}  ✅ All services started!${NC}"
@@ -190,8 +250,24 @@ start_all() {
     echo ""
     echo -e "${YELLOW}Press Ctrl+C to stop frontend, then run './run.sh stop' to stop all${NC}"
     echo ""
-    
-    wait $FRONTEND_PID
+}
+
+print_running_services_with_dashboard() {
+    echo ""
+    echo -e "${GREEN}═══════════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}  ✅ All services started (Full Stack + DevTools)!${NC}"
+    echo -e "${GREEN}═══════════════════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    echo "  📊 Dashboard:  http://localhost:3333  ← opened in browser"
+    echo "  👑 Admin:      http://localhost:9000"
+    echo "  🌐 Frontend:   http://localhost:8080"
+    echo "  🔌 Backend:    http://localhost:8000"
+    echo "  📧 Mailpit:    http://localhost:8025"
+    echo "  🐘 PostgreSQL: localhost:5432"
+    echo "  🔴 Redis:      localhost:6379"
+    echo ""
+    echo -e "${YELLOW}Press Ctrl+C to stop frontend, then run './run.sh stop' to stop all${NC}"
+    echo ""
 }
 
 stop_all() {
@@ -208,9 +284,21 @@ stop_all() {
         kill $(cat "$BASE_DIR/.frontend.pid") 2>/dev/null || true
         rm "$BASE_DIR/.frontend.pid"
     fi
-    
-    # Kill any remaining node processes on port 8080
     lsof -ti:8080 | xargs kill -9 2>/dev/null || true
+    
+    # Stop Admin frontend
+    if [ -f "$BASE_DIR/.admin.pid" ]; then
+        kill $(cat "$BASE_DIR/.admin.pid") 2>/dev/null || true
+        rm "$BASE_DIR/.admin.pid"
+    fi
+    lsof -ti:9000 | xargs kill -9 2>/dev/null || true
+    
+    # Stop Dashboard
+    if [ -f "$BASE_DIR/.dashboard.pid" ]; then
+        kill $(cat "$BASE_DIR/.dashboard.pid") 2>/dev/null || true
+        rm "$BASE_DIR/.dashboard.pid"
+    fi
+    lsof -ti:3333 | xargs kill -9 2>/dev/null || true
     
     # Stop Docker
     stop_docker
@@ -257,9 +345,11 @@ BUNDLES=(
     "till-kubelke-module-chat"
     "till-kubelke-module-ai-buddy"
     "till-kubelke-module-hr-integration"
+    "till-kubelke-module-deployment-dashboard"
     "till-kubelke-app-easybgm"
     "till-kubelke-product-easybgm-backend"
     "till-kubelke-product-easybgm-frontend"
+    "till-kubelke-product-admin-frontend"
 )
 
 git_pull_all() {
@@ -399,8 +489,6 @@ clean_all() {
 # ═══════════════════════════════════════════════════════════════════════════
 
 start_dashboard() {
-    DASHBOARD_DIR="$BASE_DIR/deployment-dashboard"
-    
     echo -e "${BLUE}📊 Starting Deployment Dashboard...${NC}"
     
     if [ ! -d "$DASHBOARD_DIR" ]; then
@@ -416,14 +504,84 @@ start_dashboard() {
     fi
     
     echo -e "${GREEN}✅ Dashboard starting on http://localhost:3333${NC}"
-    echo ""
-    echo -e "${CYAN}Configure tokens in deployment-dashboard/.env for full functionality${NC}"
-    echo ""
     
     # Open in browser
     open http://localhost:3333 2>/dev/null || xdg-open http://localhost:3333 2>/dev/null || true
     
-    npm start
+    node server.js
+}
+
+start_admin() {
+    echo -e "${BLUE}👑 Starting Admin Portal...${NC}"
+    
+    if [ ! -d "$ADMIN_DIR" ]; then
+        echo -e "${RED}Admin Portal not found at $ADMIN_DIR${NC}"
+        exit 1
+    fi
+    
+    cd "$ADMIN_DIR"
+    
+    if [ ! -d "node_modules" ]; then
+        echo -e "${YELLOW}Installing Admin Portal dependencies...${NC}"
+        npm install
+    fi
+    
+    echo -e "${GREEN}✅ Admin Portal starting on http://localhost:9000${NC}"
+    
+    # Open in browser
+    open http://localhost:9000 2>/dev/null || xdg-open http://localhost:9000 2>/dev/null || true
+    
+    npm run dev
+}
+
+start_dashboard_background() {
+    echo -e "${BLUE}📊 Starting Deployment Dashboard in background...${NC}"
+    
+    if [ ! -d "$DASHBOARD_DIR" ]; then
+        echo -e "${YELLOW}⚠️  Dashboard not found, skipping...${NC}"
+        return
+    fi
+    
+    cd "$DASHBOARD_DIR"
+    
+    if [ ! -d "node_modules" ]; then
+        echo -e "${YELLOW}Installing dashboard dependencies...${NC}"
+        npm install
+    fi
+    
+    # Kill any existing dashboard
+    lsof -ti:3333 | xargs kill -9 2>/dev/null || true
+    
+    node server.js &
+    DASHBOARD_PID=$!
+    echo $DASHBOARD_PID > "$BASE_DIR/.dashboard.pid"
+    
+    echo -e "${GREEN}✅ Dashboard running on http://localhost:3333${NC}"
+}
+
+start_admin_background() {
+    echo -e "${BLUE}👑 Starting Admin Portal in background...${NC}"
+    
+    if [ ! -d "$ADMIN_DIR" ]; then
+        echo -e "${YELLOW}⚠️  Admin Portal not found, skipping...${NC}"
+        return
+    fi
+    
+    cd "$ADMIN_DIR"
+    
+    if [ ! -d "node_modules" ]; then
+        echo -e "${YELLOW}Installing Admin Portal dependencies...${NC}"
+        npm install
+    fi
+    
+    # Kill any existing admin
+    lsof -ti:9000 | xargs kill -9 2>/dev/null || true
+    
+    npm run dev &
+    ADMIN_PID=$!
+    echo $ADMIN_PID > "$BASE_DIR/.admin.pid"
+    
+    echo -e "${GREEN}✅ Admin Portal running on http://localhost:9000${NC}"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -432,6 +590,7 @@ start_dashboard() {
 
 case "$1" in
     start)      start_all ;;
+    start-all)  start_all_with_dashboard ;;
     stop)       stop_all ;;
     restart)    stop_all; start_all ;;
     docker)     start_docker ;;
@@ -439,6 +598,7 @@ case "$1" in
     backend)    start_backend ;;
     frontend)   start_frontend ;;
     dashboard)  start_dashboard ;;
+    admin)      start_admin ;;
     test)       run_tests ;;
     test-backend) run_backend_tests ;;
     test-frontend) run_frontend_tests ;;

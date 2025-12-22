@@ -1,0 +1,35 @@
+{
+  "name": "@till-kubelke/module-marketplace",
+  "version": "1.0.0",
+  "description": "Marketplace module for BGM service providers - Frontend components",
+  "main": "frontend/index.ts",
+  "types": "frontend/index.ts",
+  "exports": {
+    ".": "./frontend/index.ts",
+    "./sections": "./frontend/sections/index.ts",
+    "./sections/*": "./frontend/sections/*",
+    "./actions": "./frontend/actions/index.ts",
+    "./actions/*": "./frontend/actions/*",
+    "./hooks": "./frontend/hooks/index.ts",
+    "./components": "./frontend/components/index.ts",
+    "./types": "./frontend/types/index.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@mui/material": "^7.0.0",
+    "@till-kubelke/platform-ui": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/react": "^19.0.0"
+  },
+  "keywords": [
+    "marketplace",
+    "bgm",
+    "symfony-bundle",
+    "react"
+  ],
+  "license": "UNLICENSED",
+  "private": true
+}
