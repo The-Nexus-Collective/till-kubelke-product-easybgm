@@ -9,6 +9,9 @@ till-kubelke-platform-ui/
 till-kubelke-product-easybgm-backend/
 till-kubelke-product-easybgm-frontend/
 
+# Local development tools (not for PROD)
+till-kubelke-deployment-dashboard/
+
 # Ignore temporary files
 *.pid
 .cursor/rules/
