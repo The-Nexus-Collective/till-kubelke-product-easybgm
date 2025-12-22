@@ -11,6 +11,11 @@ set -e
 
 export PATH="$HOME/.symfony5/bin:/opt/homebrew/bin:$PATH"
 
+# Load nvm to ensure correct Node.js version (20.x)
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 2>/dev/null
+nvm use 20 2>/dev/null || true
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -92,8 +97,8 @@ setup_test_database() {
 DATABASE_URL="postgresql://app:app_secret@127.0.0.1:5432/app?serverVersion=16&charset=utf8"
 ENVEOF
     
-    # Clear cache and run migrations
-    rm -rf var/cache/test
+    # Clear cache and run migrations (use /bin/rm to avoid shell aliases)
+    /bin/rm -rf var/cache/test 2>/dev/null || true
     APP_ENV=test php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true
     
     # Reset test database if command exists
@@ -116,7 +121,7 @@ start_test_backend() {
     
     # Clear cache to ensure fresh configuration
     print_info "Clearing test cache..."
-    rm -rf var/cache/test 2>/dev/null || true
+    /bin/rm -rf var/cache/test 2>/dev/null || true
     APP_ENV=test php bin/console cache:clear --no-interaction > /dev/null 2>&1 || true
     
     # Start PHP built-in server with test environment
