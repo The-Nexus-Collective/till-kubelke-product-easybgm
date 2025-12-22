@@ -43,6 +43,8 @@ print_usage() {
     echo "  backend       Start Symfony backend only"
     echo "  frontend      Start Vite frontend only"
     echo ""
+    echo "  dashboard     Start Deployment Dashboard (http://localhost:3333)"
+    echo ""
     echo "  test          Run all tests"
     echo "  test-backend  Run PHPUnit tests"
     echo "  test-frontend Run Vitest tests"
@@ -393,6 +395,38 @@ clean_all() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
+# Dashboard Command
+# ═══════════════════════════════════════════════════════════════════════════
+
+start_dashboard() {
+    DASHBOARD_DIR="$BASE_DIR/deployment-dashboard"
+    
+    echo -e "${BLUE}📊 Starting Deployment Dashboard...${NC}"
+    
+    if [ ! -d "$DASHBOARD_DIR" ]; then
+        echo -e "${RED}Dashboard not found at $DASHBOARD_DIR${NC}"
+        exit 1
+    fi
+    
+    cd "$DASHBOARD_DIR"
+    
+    if [ ! -d "node_modules" ]; then
+        echo -e "${YELLOW}Installing dashboard dependencies...${NC}"
+        npm install
+    fi
+    
+    echo -e "${GREEN}✅ Dashboard starting on http://localhost:3333${NC}"
+    echo ""
+    echo -e "${CYAN}Configure tokens in deployment-dashboard/.env for full functionality${NC}"
+    echo ""
+    
+    # Open in browser
+    open http://localhost:3333 2>/dev/null || xdg-open http://localhost:3333 2>/dev/null || true
+    
+    npm start
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Main
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -404,6 +438,7 @@ case "$1" in
     docker-stop) stop_docker ;;
     backend)    start_backend ;;
     frontend)   start_frontend ;;
+    dashboard)  start_dashboard ;;
     test)       run_tests ;;
     test-backend) run_backend_tests ;;
     test-frontend) run_frontend_tests ;;
