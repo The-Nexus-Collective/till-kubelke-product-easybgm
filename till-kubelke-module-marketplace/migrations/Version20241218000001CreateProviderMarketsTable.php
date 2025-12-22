@@ -57,3 +57,4 @@ final class Version20241218000001CreateProviderMarketsTable extends AbstractMigr
         $this->addSql('DROP TABLE marketplace_provider_markets');
     }
 }
+

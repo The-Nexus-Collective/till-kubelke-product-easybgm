@@ -591,3 +591,4 @@ class SeedProductionProvidersCommand extends Command
         return trim($text, '-');
     }
 }
+
