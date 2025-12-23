@@ -1,0 +1,147 @@
+# 🔒 Security Check Workflow
+# ===========================
+#
+# This workflow runs on every push and PR to check for security issues.
+# It includes:
+# 1. Static analysis for insecure tenant patterns
+# 2. PHPUnit security tests (tenant isolation, privilege escalation)
+# 3. Controller endpoint security tests
+#
+# It will fail the build if any security issues are detected.
+
+name: Security Check
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+    paths:
+      - '**/*.php'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - '**/*.php'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  # ==================== Static Analysis ====================
+  static-security-check:
+    name: Static Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run tenant security static check
+        run: |
+          chmod +x ./scripts/security/check-tenant-security.sh
+          ./scripts/security/check-tenant-security.sh --fix-suggestions
+
+      - name: Static check passed
+        if: success()
+        run: echo "✅ Static security analysis passed"
+
+  # ==================== PHPUnit Security Tests ====================
+  security-tests:
+    name: PHPUnit Security Tests
+    runs-on: ubuntu-latest
+    needs: static-security-check
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_pgsql, mbstring, xml, ctype, iconv, intl
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      # Run security tests for each module
+      - name: Install dependencies (Marketplace)
+        working-directory: till-kubelke-module-marketplace
+        run: composer install --no-progress --prefer-dist
+
+      - name: Run Marketplace Security Tests
+        working-directory: till-kubelke-module-marketplace
+        env:
+          DATABASE_URL: postgresql://app:app@localhost:5432/app_test
+        run: |
+          vendor/bin/phpunit --group security --colors=always --testdox
+
+      - name: Install dependencies (Chat)
+        working-directory: till-kubelke-module-chat
+        run: composer install --no-progress --prefer-dist
+
+      - name: Run Chat Security Tests
+        working-directory: till-kubelke-module-chat
+        env:
+          DATABASE_URL: postgresql://app:app@localhost:5432/app_test
+        run: |
+          vendor/bin/phpunit --group security --colors=always --testdox
+
+      - name: Install dependencies (Product Backend)
+        working-directory: till-kubelke-product-easybgm-backend
+        run: composer install --no-progress --prefer-dist
+
+      - name: Run Product Backend Security Tests
+        working-directory: till-kubelke-product-easybgm-backend
+        env:
+          DATABASE_URL: postgresql://app:app@localhost:5432/app_test
+        run: |
+          vendor/bin/phpunit --group security --colors=always --testdox
+
+      - name: All security tests passed
+        if: success()
+        run: echo "✅ All security tests passed"
+
+  # ==================== Summary ====================
+  security-summary:
+    name: Security Check Summary
+    runs-on: ubuntu-latest
+    needs: [static-security-check, security-tests]
+    if: always()
+    
+    steps:
+      - name: Check results
+        run: |
+          if [ "${{ needs.static-security-check.result }}" == "failure" ] || [ "${{ needs.security-tests.result }}" == "failure" ]; then
+            echo "🚨 SECURITY CHECK FAILED"
+            echo "Please review the security test results above."
+            exit 1
+          fi
+          echo "✅ All security checks passed!"
+          echo ""
+          echo "Verified:"
+          echo "  ✓ No insecure tenant patterns in code"
+          echo "  ✓ Tenant isolation tests passed"
+          echo "  ✓ Privilege escalation prevention tests passed"
+          echo "  ✓ Controller security tests passed"
+

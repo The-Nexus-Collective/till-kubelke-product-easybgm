@@ -35,38 +35,41 @@ print_usage() {
     echo -e "${CYAN}Usage:${NC} ./run.sh [command]"
     echo ""
     echo -e "${YELLOW}Commands:${NC}"
-    echo "  start         Start all services (Docker + Backend + Frontend)"
-    echo "  start-all     Start ALL including Deployment Dashboard"
-    echo "  stop          Stop all services"
-    echo "  restart       Restart all services"
+    echo "  start            Start all services (Docker + Backend + Frontend)"
+    echo "  start-all        Start ALL including Deployment Dashboard"
+    echo "  stop             Stop all services"
+    echo "  restart          Restart all services"
     echo ""
-    echo "  docker        Start Docker services only (PostgreSQL, Redis, Mailpit)"
-    echo "  docker-stop   Stop Docker services"
+    echo "  docker           Start Docker services only (PostgreSQL, Redis, Mailpit)"
+    echo "  docker-stop      Stop Docker services"
     echo ""
-    echo "  backend       Start Symfony backend only"
-    echo "  frontend      Start Vite frontend only"
+    echo "  backend          Start Symfony backend only"
+    echo "  frontend         Start Vite frontend only"
+    echo "  restart-backend  Restart backend only"
+    echo "  restart-frontend Restart frontend only"
     echo ""
-    echo "  dashboard     Start Deployment Dashboard (http://localhost:3333)"
-    echo "  admin         Start Super Admin Portal (http://localhost:9000)"
+    echo "  dashboard        Start Deployment Dashboard (http://localhost:3333)"
+    echo "  admin            Start Super Admin Portal (http://localhost:9000)"
     echo ""
-    echo "  test          Run all tests"
-    echo "  test-backend  Run PHPUnit tests"
-    echo "  test-frontend Run Vitest tests"
-    echo "  test-e2e      Run Playwright E2E tests"
+    echo "  test             Run all tests"
+    echo "  test-backend     Run PHPUnit tests"
+    echo "  test-frontend    Run Vitest tests"
+    echo "  test-e2e         Run Playwright E2E tests"
     echo ""
-    echo "  install       Install all dependencies"
-    echo "  update        Update all dependencies"
-    echo "  pull          Git pull all repositories"
-    echo "  push          Git push all repositories"
-    echo "  status        Show git status for all repositories"
+    echo "  install          Install all dependencies (+ fix React symlinks)"
+    echo "  fix-react        Fix React symlinks only (after npm install)"
+    echo "  update           Update all dependencies"
+    echo "  pull             Git pull all repositories"
+    echo "  push             Git push all repositories"
+    echo "  status           Show git status for all repositories"
     echo ""
-    echo "  logs          Show Docker logs"
-    echo "  db            Open PostgreSQL CLI"
-    echo "  redis         Open Redis CLI"
-    echo "  mail          Open Mailpit in browser"
+    echo "  logs             Show Docker logs"
+    echo "  db               Open PostgreSQL CLI"
+    echo "  redis            Open Redis CLI"
+    echo "  mail             Open Mailpit in browser"
     echo ""
-    echo "  clean         Clean all caches and build artifacts"
-    echo "  reset-db      Reset database (drop + create + migrate)"
+    echo "  clean            Clean all caches and build artifacts"
+    echo "  reset-db         Reset database (drop + create + migrate)"
     echo ""
 }
 
@@ -134,11 +137,82 @@ start_frontend() {
     
     if [ ! -d "node_modules" ]; then
         echo -e "${YELLOW}Installing dependencies...${NC}"
-        npm install
+        npm install --legacy-peer-deps
+        fix_react_symlinks
     fi
     
     echo -e "${GREEN}✅ Frontend starting on http://localhost:8080${NC}"
     npm run dev
+}
+
+# Fix React duplication issue with file: references
+fix_react_symlinks() {
+    echo -e "${CYAN}🔗 Fixing React symlinks...${NC}"
+    
+    PLATFORM_UI_DIR="$BASE_DIR/till-kubelke-platform-ui"
+    
+    if [ ! -d "$PLATFORM_UI_DIR/node_modules" ]; then
+        echo -e "${YELLOW}Platform UI node_modules not found, skipping...${NC}"
+        return
+    fi
+    
+    if [ ! -d "$FRONTEND_DIR/node_modules/react" ]; then
+        echo -e "${YELLOW}Frontend React not found, skipping...${NC}"
+        return
+    fi
+    
+    # Symlink React runtime
+    cd "$PLATFORM_UI_DIR/node_modules"
+    rm -rf react react-dom 2>/dev/null || true
+    ln -sf "$FRONTEND_DIR/node_modules/react" react
+    ln -sf "$FRONTEND_DIR/node_modules/react-dom" react-dom
+    
+    # Symlink @types/react (for TypeScript compatibility)
+    cd "$PLATFORM_UI_DIR/node_modules/@types"
+    rm -rf react react-dom 2>/dev/null || true
+    ln -sf "$FRONTEND_DIR/node_modules/@types/react" react
+    ln -sf "$FRONTEND_DIR/node_modules/@types/react-dom" react-dom
+    
+    # Symlink @mui/x-data-grid (for MUI type compatibility)
+    cd "$PLATFORM_UI_DIR/node_modules/@mui"
+    rm -rf x-data-grid 2>/dev/null || true
+    ln -sf "$FRONTEND_DIR/node_modules/@mui/x-data-grid" x-data-grid
+    
+    echo -e "${GREEN}✅ React symlinks fixed (runtime + types + MUI)${NC}"
+}
+
+restart_frontend() {
+    echo -e "${BLUE}🔄 Restarting frontend...${NC}"
+    
+    # Kill existing frontend process
+    lsof -ti:8080 | xargs kill -9 2>/dev/null || true
+    sleep 1
+    
+    # Start frontend in background
+    cd "$FRONTEND_DIR"
+    npm run dev &
+    FRONTEND_PID=$!
+    echo $FRONTEND_PID > "$BASE_DIR/.frontend.pid"
+    
+    echo -e "${GREEN}✅ Frontend restarted on http://localhost:8080 (PID: $FRONTEND_PID)${NC}"
+}
+
+restart_backend() {
+    echo -e "${BLUE}🔄 Restarting backend...${NC}"
+    
+    # Stop Symfony server
+    cd "$BACKEND_DIR"
+    symfony server:stop 2>/dev/null || true
+    lsof -ti:8000 | xargs kill -9 2>/dev/null || true
+    sleep 1
+    
+    # Clear cache
+    php bin/console cache:clear 2>/dev/null || true
+    
+    # Start backend
+    symfony server:start --no-tls --port=8000 -d
+    
+    echo -e "${GREEN}✅ Backend restarted on http://localhost:8000${NC}"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -412,9 +486,20 @@ install_all() {
     cd "$BACKEND_DIR"
     composer install
     
+    echo -e "${CYAN}Platform UI:${NC}"
+    cd "$BASE_DIR/till-kubelke-platform-ui"
+    npm install --legacy-peer-deps
+    
     echo -e "${CYAN}Frontend:${NC}"
     cd "$FRONTEND_DIR"
-    npm install
+    npm install --legacy-peer-deps
+    
+    echo -e "${CYAN}Admin Portal:${NC}"
+    cd "$ADMIN_DIR"
+    npm install --legacy-peer-deps 2>/dev/null || true
+    
+    # Fix React symlinks
+    fix_react_symlinks
     
     echo -e "${GREEN}✅ All dependencies installed${NC}"
 }
@@ -589,30 +674,33 @@ start_admin_background() {
 # ═══════════════════════════════════════════════════════════════════════════
 
 case "$1" in
-    start)      start_all ;;
-    start-all)  start_all_with_dashboard ;;
-    stop)       stop_all ;;
-    restart)    stop_all; start_all ;;
-    docker)     start_docker ;;
-    docker-stop) stop_docker ;;
-    backend)    start_backend ;;
-    frontend)   start_frontend ;;
-    dashboard)  start_dashboard ;;
-    admin)      start_admin ;;
-    test)       run_tests ;;
-    test-backend) run_backend_tests ;;
-    test-frontend) run_frontend_tests ;;
-    test-e2e)   run_e2e_tests ;;
-    install)    install_all ;;
-    update)     update_all ;;
-    pull)       git_pull_all ;;
-    push)       git_push_all ;;
-    status)     git_status_all ;;
-    logs)       show_logs ;;
-    db)         open_db ;;
-    redis)      open_redis ;;
-    mail)       open_mail ;;
-    clean)      clean_all ;;
-    reset-db)   reset_database ;;
-    *)          print_header; print_usage ;;
+    start)            start_all ;;
+    start-all)        start_all_with_dashboard ;;
+    stop)             stop_all ;;
+    restart)          stop_all; start_all ;;
+    docker)           start_docker ;;
+    docker-stop)      stop_docker ;;
+    backend)          start_backend ;;
+    frontend)         start_frontend ;;
+    restart-backend)  restart_backend ;;
+    restart-frontend) restart_frontend ;;
+    dashboard)        start_dashboard ;;
+    admin)            start_admin ;;
+    test)             run_tests ;;
+    test-backend)     run_backend_tests ;;
+    test-frontend)    run_frontend_tests ;;
+    test-e2e)         run_e2e_tests ;;
+    install)          install_all ;;
+    fix-react)        fix_react_symlinks ;;
+    update)           update_all ;;
+    pull)             git_pull_all ;;
+    push)             git_push_all ;;
+    status)           git_status_all ;;
+    logs)             show_logs ;;
+    db)               open_db ;;
+    redis)            open_redis ;;
+    mail)             open_mail ;;
+    clean)            clean_all ;;
+    reset-db)         reset_database ;;
+    *)                print_header; print_usage ;;
 esac

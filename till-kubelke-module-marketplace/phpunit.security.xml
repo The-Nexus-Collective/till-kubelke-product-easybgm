@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    PHPUnit Configuration for Security Tests
+    =========================================
+    
+    Run with: vendor/bin/phpunit -c phpunit.security.xml
+    
+    Or use the main phpunit.xml with: vendor/bin/phpunit --group security
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         displayDetailsOnIncompleteTests="true"
+         displayDetailsOnSkippedTests="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerErrors="true">
+
+    <testsuites>
+        <testsuite name="Security">
+            <directory>Tests/Unit/EventSubscriber</directory>
+            <directory>Tests/Integration/Security</directory>
+        </testsuite>
+    </testsuites>
+
+    <groups>
+        <include>
+            <group>security</group>
+            <group>tenant-isolation</group>
+            <group>controller-security</group>
+        </include>
+    </groups>
+
+    <source>
+        <include>
+            <directory>src/Controller</directory>
+            <directory>src/EventSubscriber</directory>
+        </include>
+    </source>
+
+    <php>
+        <env name="APP_ENV" value="test"/>
+        <env name="KERNEL_CLASS" value="TillKubelke\ModuleMarketplace\Kernel"/>
+    </php>
+</phpunit>
+

@@ -13,11 +13,31 @@
     </php>
 
     <testsuites>
+        <!-- All tests -->
+        <testsuite name="All">
+            <directory>Tests</directory>
+        </testsuite>
+        
+        <!-- Unit tests only -->
         <testsuite name="Unit">
             <directory>Tests/Unit</directory>
         </testsuite>
+        
+        <!-- Integration tests only -->
+        <testsuite name="Integration">
+            <directory>Tests/Integration</directory>
+        </testsuite>
+        
+        <!-- Security tests only -->
+        <testsuite name="Security">
+            <directory>Tests/Unit/EventSubscriber</directory>
+            <directory>Tests/Integration/Security</directory>
+        </testsuite>
     </testsuites>
 
+    <!-- Test groups for selective runs -->
+    <!-- Run with: vendor/bin/phpunit --group security -->
+    
     <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">src</directory>

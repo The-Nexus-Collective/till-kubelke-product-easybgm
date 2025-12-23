@@ -3,25 +3,28 @@
 namespace TillKubelke\ModuleMarketplace\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use TillKubelke\ModuleMarketplace\Entity\PartnerBookmark;
 use TillKubelke\ModuleMarketplace\Entity\ServiceProvider;
 use TillKubelke\ModuleMarketplace\Repository\PartnerBookmarkRepository;
 use TillKubelke\ModuleMarketplace\Repository\ServiceProviderRepository;
+use TillKubelke\PlatformFoundation\Tenant\Controller\AbstractTenantController;
 use TillKubelke\PlatformFoundation\Tenant\Entity\Tenant;
 
 /**
  * Controller for managing partner bookmarks.
  * Allows tenants to manually mark providers as "their partners".
+ * 
+ * SECURITY: Uses AbstractTenantController for validated tenant access.
  */
 #[Route('/api/marketplace/bookmarks', name: 'api_marketplace_bookmarks_')]
 #[IsGranted('ROLE_USER')]
-class BookmarkController extends AbstractController
+class BookmarkController extends AbstractTenantController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -36,10 +39,11 @@ class BookmarkController extends AbstractController
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if (!$tenant) {
-            return new JsonResponse(['error' => 'Tenant not found'], Response::HTTP_BAD_REQUEST);
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $bookmarks = $this->bookmarkRepository->findByTenant($tenant);
 
@@ -55,10 +59,11 @@ class BookmarkController extends AbstractController
     #[Route('/{providerId}', name: 'add', methods: ['POST'], requirements: ['providerId' => '\d+'])]
     public function add(int $providerId, Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if (!$tenant) {
-            return new JsonResponse(['error' => 'Tenant not found'], Response::HTTP_BAD_REQUEST);
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $provider = $this->providerRepository->find($providerId);
         if (!$provider) {
@@ -101,10 +106,11 @@ class BookmarkController extends AbstractController
     #[Route('/{providerId}', name: 'remove', methods: ['DELETE'], requirements: ['providerId' => '\d+'])]
     public function remove(int $providerId, Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if (!$tenant) {
-            return new JsonResponse(['error' => 'Tenant not found'], Response::HTTP_BAD_REQUEST);
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $bookmark = $this->bookmarkRepository->findOneByTenantAndProvider($tenant, $providerId);
         if (!$bookmark) {
@@ -126,10 +132,11 @@ class BookmarkController extends AbstractController
     #[Route('/{providerId}', name: 'update', methods: ['PATCH'], requirements: ['providerId' => '\d+'])]
     public function update(int $providerId, Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if (!$tenant) {
-            return new JsonResponse(['error' => 'Tenant not found'], Response::HTTP_BAD_REQUEST);
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $bookmark = $this->bookmarkRepository->findOneByTenantAndProvider($tenant, $providerId);
         if (!$bookmark) {
@@ -150,18 +157,32 @@ class BookmarkController extends AbstractController
         ]);
     }
 
-    private function getTenantFromRequest(Request $request): ?Tenant
-    {
-        $tenantId = $request->headers->get('X-Tenant-ID');
-        if (!$tenantId) {
-            return null;
-        }
+    // ========== Security: Validated Tenant Access ==========
 
-        return $this->entityManager->getRepository(Tenant::class)->find($tenantId);
+    /**
+     * Validate tenant from request header with access control.
+     * 
+     * SECURITY: Uses AbstractTenantController::getValidatedTenant() which
+     * checks that the current user has membership in the requested tenant.
+     * This prevents ID spoofing attacks.
+     */
+    private function validateTenant(Request $request): Tenant|JsonResponse
+    {
+        try {
+            $tenant = $this->getValidatedTenant($request, $this->entityManager);
+            if (!$tenant) {
+                return new JsonResponse(
+                    ['error' => 'X-Tenant-ID header is required'],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+            return $tenant;
+        } catch (AccessDeniedException $e) {
+            return new JsonResponse(
+                ['error' => 'Access to this tenant denied'],
+                Response::HTTP_FORBIDDEN
+            );
+        }
     }
 }
-
-
-
-
 

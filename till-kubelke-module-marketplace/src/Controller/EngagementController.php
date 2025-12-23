@@ -3,28 +3,31 @@
 namespace TillKubelke\ModuleMarketplace\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use TillKubelke\ModuleMarketplace\Entity\PartnerEngagement;
 use TillKubelke\ModuleMarketplace\Repository\ServiceOfferingRepository;
 use TillKubelke\ModuleMarketplace\Repository\ServiceProviderRepository;
 use TillKubelke\ModuleMarketplace\Service\EngagementService;
 use TillKubelke\ModuleMarketplace\Service\ParticipationAggregationService;
+use TillKubelke\PlatformFoundation\Tenant\Controller\AbstractTenantController;
 use TillKubelke\PlatformFoundation\Tenant\Entity\Tenant;
 
 /**
  * EngagementController - API endpoints for partner engagement management.
  * 
  * Handles the full lifecycle of partner engagements from the customer's perspective.
+ * 
+ * SECURITY: Uses AbstractTenantController for validated tenant access.
  */
 #[Route('/api/marketplace/engagements', name: 'api_marketplace_engagements_')]
 #[IsGranted('ROLE_USER')]
-class EngagementController extends AbstractController
+class EngagementController extends AbstractTenantController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -40,10 +43,11 @@ class EngagementController extends AbstractController
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $activeOnly = $request->query->getBoolean('active', false);
 
@@ -66,10 +70,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function get(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -91,10 +96,11 @@ class EngagementController extends AbstractController
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $data = json_decode($request->getContent(), true);
 
@@ -151,10 +157,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}/activate', name: 'activate', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function activate(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -182,10 +189,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}/cancel', name: 'cancel', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function cancel(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -213,10 +221,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}/complete', name: 'complete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function complete(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -246,10 +255,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}/data-access', name: 'data_access', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function getDataAccess(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -270,10 +280,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}/grant-data', name: 'grant_data', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function grantData(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -307,10 +318,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}/revoke-data', name: 'revoke_data', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function revokeData(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -346,10 +358,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}/notes', name: 'update_notes', methods: ['PATCH'], requirements: ['id' => '\d+'])]
     public function updateNotes(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -375,10 +388,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}/results', name: 'list_results', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function listResults(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -408,10 +422,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}/results', name: 'upload_result', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function uploadResult(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -485,10 +500,11 @@ class EngagementController extends AbstractController
     #[Route('/{id}/results/{outputType}/integrate', name: 'integrate_result', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function integrateResult(Request $request, int $id, string $outputType): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementService->getEngagement($tenant, $id);
         if ($engagement === null) {
@@ -531,10 +547,11 @@ class EngagementController extends AbstractController
     #[Route('/stats', name: 'stats', methods: ['GET'])]
     public function getStats(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $activeCount = $this->engagementService->countActiveEngagements($tenant);
         $pendingIntegration = $this->engagementService->getEngagementsWithPendingIntegration($tenant);
@@ -545,28 +562,32 @@ class EngagementController extends AbstractController
         ]);
     }
 
-    // ========== Helper Methods ==========
+    // ========== Security: Validated Tenant Access ==========
 
-    private function getTenantFromRequest(Request $request): ?Tenant
+    /**
+     * Validate tenant from request header with access control.
+     * 
+     * SECURITY: Uses AbstractTenantController::getValidatedTenant() which
+     * checks that the current user has membership in the requested tenant.
+     * This prevents ID spoofing attacks.
+     */
+    private function validateTenant(Request $request): Tenant|JsonResponse
     {
-        $tenantId = $request->headers->get('X-Tenant-ID');
-        if ($tenantId === null) {
-            return null;
+        try {
+            $tenant = $this->getValidatedTenant($request, $this->entityManager);
+            if (!$tenant) {
+                return new JsonResponse(
+                    ['error' => 'X-Tenant-ID header is required'],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+            return $tenant;
+        } catch (AccessDeniedException $e) {
+            return new JsonResponse(
+                ['error' => 'Access to this tenant denied'],
+                Response::HTTP_FORBIDDEN
+            );
         }
-
-        return $this->entityManager->find(Tenant::class, (int) $tenantId);
-    }
-
-    private function missingTenantError(): JsonResponse
-    {
-        return new JsonResponse(
-            ['error' => 'X-Tenant-ID header is required'],
-            Response::HTTP_BAD_REQUEST
-        );
     }
 }
-
-
-
-
 

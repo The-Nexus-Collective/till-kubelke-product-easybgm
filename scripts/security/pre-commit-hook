@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# 🔒 Pre-Commit Hook: Tenant Security Check
+# ==========================================
+#
+# This hook runs before every commit to prevent insecure tenant
+# access patterns from entering the codebase.
+#
+# Install with:
+#   ./scripts/security/install-hooks.sh
+#
+# Or manually:
+#   ln -sf ../../scripts/security/pre-commit-hook .git/hooks/pre-commit
+#
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Run the security check
+"$SCRIPT_DIR/check-tenant-security.sh"
+
+# If check fails, abort commit
+if [[ $? -ne 0 ]]; then
+    echo ""
+    echo "Commit aborted due to security issues."
+    echo "Fix the issues above and try again."
+    exit 1
+fi
+
+exit 0
+

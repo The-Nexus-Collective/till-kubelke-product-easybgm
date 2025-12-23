@@ -3,27 +3,30 @@
 namespace TillKubelke\ModuleMarketplace\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use TillKubelke\ModuleMarketplace\Entity\InterventionParticipation;
 use TillKubelke\ModuleMarketplace\Entity\PartnerEngagement;
 use TillKubelke\ModuleMarketplace\Repository\InterventionParticipationRepository;
 use TillKubelke\ModuleMarketplace\Repository\PartnerEngagementRepository;
 use TillKubelke\ModuleMarketplace\Service\ParticipationAggregationService;
+use TillKubelke\PlatformFoundation\Tenant\Controller\AbstractTenantController;
 use TillKubelke\PlatformFoundation\Tenant\Entity\Tenant;
 
 /**
  * ParticipationController - API endpoints for tracking intervention participation.
  * 
  * Key principle: Personal data stays internal, partners only get aggregates.
+ * 
+ * SECURITY: Uses AbstractTenantController for validated tenant access.
  */
 #[Route('/api/marketplace/participations', name: 'api_marketplace_participations_')]
 #[IsGranted('ROLE_USER')]
-class ParticipationController extends AbstractController
+class ParticipationController extends AbstractTenantController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -38,10 +41,11 @@ class ParticipationController extends AbstractController
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagementId = $request->query->getInt('engagementId');
         
@@ -73,10 +77,11 @@ class ParticipationController extends AbstractController
     #[Route('/{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function get(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $participation = $this->participationRepository->find($id);
         if ($participation === null || $participation->getTenant()?->getId() !== $tenant->getId()) {
@@ -95,10 +100,11 @@ class ParticipationController extends AbstractController
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $data = json_decode($request->getContent(), true);
 
@@ -150,10 +156,11 @@ class ParticipationController extends AbstractController
     #[Route('/bulk', name: 'bulk_create', methods: ['POST'])]
     public function bulkCreate(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $data = json_decode($request->getContent(), true);
         $participants = $data['participants'] ?? [];
@@ -218,10 +225,11 @@ class ParticipationController extends AbstractController
     #[Route('/{id}/attend', name: 'attend', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function markAttended(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $participation = $this->participationRepository->find($id);
         if ($participation === null || $participation->getTenant()?->getId() !== $tenant->getId()) {
@@ -243,10 +251,11 @@ class ParticipationController extends AbstractController
     #[Route('/{id}/no-show', name: 'no_show', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function markNoShow(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $participation = $this->participationRepository->find($id);
         if ($participation === null || $participation->getTenant()?->getId() !== $tenant->getId()) {
@@ -268,10 +277,11 @@ class ParticipationController extends AbstractController
     #[Route('/{id}/cancel', name: 'cancel', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function cancel(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $participation = $this->participationRepository->find($id);
         if ($participation === null || $participation->getTenant()?->getId() !== $tenant->getId()) {
@@ -293,10 +303,11 @@ class ParticipationController extends AbstractController
     #[Route('/{id}/feedback', name: 'feedback', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function addFeedback(Request $request, int $id): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $participation = $this->participationRepository->find($id);
         if ($participation === null || $participation->getTenant()?->getId() !== $tenant->getId()) {
@@ -336,10 +347,11 @@ class ParticipationController extends AbstractController
     #[Route('/engagement/{engagementId}/stats', name: 'engagement_stats', methods: ['GET'], requirements: ['engagementId' => '\d+'])]
     public function getEngagementStats(Request $request, int $engagementId): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $engagement = $this->engagementRepository->find($engagementId);
         if ($engagement === null || $engagement->getTenant()?->getId() !== $tenant->getId()) {
@@ -360,10 +372,11 @@ class ParticipationController extends AbstractController
     #[Route('/reports/internal', name: 'internal_report', methods: ['GET'])]
     public function getInternalReport(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $year = $request->query->getInt('year', (int) date('Y'));
         $report = $this->aggregationService->generateInternalReport($tenant, $year);
@@ -377,10 +390,11 @@ class ParticipationController extends AbstractController
     #[Route('/reports/insurance', name: 'insurance_report', methods: ['GET'])]
     public function getInsuranceReport(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $year = $request->query->getInt('year', (int) date('Y'));
         $report = $this->aggregationService->generateInsuranceReport($tenant, $year);
@@ -394,10 +408,11 @@ class ParticipationController extends AbstractController
     #[Route('/reports/kpi-trend', name: 'kpi_trend', methods: ['GET'])]
     public function getKpiTrend(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if ($tenant === null) {
-            return $this->missingTenantError();
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $year = $request->query->getInt('year', (int) date('Y'));
         $trend = $this->aggregationService->getKpiTrendData($tenant, $year);
@@ -405,28 +420,32 @@ class ParticipationController extends AbstractController
         return new JsonResponse($trend);
     }
 
-    // ========== Helper Methods ==========
+    // ========== Security: Validated Tenant Access ==========
 
-    private function getTenantFromRequest(Request $request): ?Tenant
+    /**
+     * Validate tenant from request header with access control.
+     * 
+     * SECURITY: Uses AbstractTenantController::getValidatedTenant() which
+     * checks that the current user has membership in the requested tenant.
+     * This prevents ID spoofing attacks.
+     */
+    private function validateTenant(Request $request): Tenant|JsonResponse
     {
-        $tenantId = $request->headers->get('X-Tenant-ID');
-        if ($tenantId === null) {
-            return null;
+        try {
+            $tenant = $this->getValidatedTenant($request, $this->entityManager);
+            if (!$tenant) {
+                return new JsonResponse(
+                    ['error' => 'X-Tenant-ID header is required'],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+            return $tenant;
+        } catch (AccessDeniedException $e) {
+            return new JsonResponse(
+                ['error' => 'Access to this tenant denied'],
+                Response::HTTP_FORBIDDEN
+            );
         }
-
-        return $this->entityManager->find(Tenant::class, (int) $tenantId);
-    }
-
-    private function missingTenantError(): JsonResponse
-    {
-        return new JsonResponse(
-            ['error' => 'X-Tenant-ID header is required'],
-            Response::HTTP_BAD_REQUEST
-        );
     }
 }
-
-
-
-
 

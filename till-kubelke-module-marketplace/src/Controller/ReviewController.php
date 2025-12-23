@@ -3,11 +3,11 @@
 namespace TillKubelke\ModuleMarketplace\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use TillKubelke\ModuleMarketplace\Entity\PartnerEngagement;
 use TillKubelke\ModuleMarketplace\Entity\PartnerReview;
@@ -15,6 +15,7 @@ use TillKubelke\ModuleMarketplace\Entity\ServiceProvider;
 use TillKubelke\ModuleMarketplace\Repository\PartnerEngagementRepository;
 use TillKubelke\ModuleMarketplace\Repository\PartnerReviewRepository;
 use TillKubelke\ModuleMarketplace\Repository\ServiceProviderRepository;
+use TillKubelke\PlatformFoundation\Tenant\Controller\AbstractTenantController;
 use TillKubelke\PlatformFoundation\Tenant\Entity\Tenant;
 
 /**
@@ -22,9 +23,11 @@ use TillKubelke\PlatformFoundation\Tenant\Entity\Tenant;
  * 
  * Public reviews are visible to everyone, but only authenticated users
  * with completed engagements can submit reviews.
+ * 
+ * SECURITY: Uses AbstractTenantController for validated tenant access.
  */
 #[Route('/api/marketplace/reviews', name: 'api_marketplace_reviews_')]
-class ReviewController extends AbstractController
+class ReviewController extends AbstractTenantController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -100,10 +103,11 @@ class ReviewController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function getMyReviews(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if (!$tenant) {
-            return new JsonResponse(['error' => 'Tenant not found'], Response::HTTP_BAD_REQUEST);
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $reviews = $this->reviewRepository->findByTenant($tenant);
 
@@ -119,10 +123,11 @@ class ReviewController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function canReview(int $providerId, Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if (!$tenant) {
-            return new JsonResponse(['error' => 'Tenant not found'], Response::HTTP_BAD_REQUEST);
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $provider = $this->providerRepository->find($providerId);
         if (!$provider) {
@@ -186,10 +191,11 @@ class ReviewController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function createReview(Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if (!$tenant) {
-            return new JsonResponse(['error' => 'Tenant not found'], Response::HTTP_BAD_REQUEST);
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $data = json_decode($request->getContent(), true) ?? [];
 
@@ -310,10 +316,11 @@ class ReviewController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function updateReview(int $reviewId, Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if (!$tenant) {
-            return new JsonResponse(['error' => 'Tenant not found'], Response::HTTP_BAD_REQUEST);
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $review = $this->reviewRepository->find($reviewId);
         if (!$review || $review->getTenant() !== $tenant) {
@@ -372,10 +379,11 @@ class ReviewController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function deleteReview(int $reviewId, Request $request): JsonResponse
     {
-        $tenant = $this->getTenantFromRequest($request);
-        if (!$tenant) {
-            return new JsonResponse(['error' => 'Tenant not found'], Response::HTTP_BAD_REQUEST);
+        $tenantResult = $this->validateTenant($request);
+        if ($tenantResult instanceof JsonResponse) {
+            return $tenantResult;
         }
+        $tenant = $tenantResult;
 
         $review = $this->reviewRepository->find($reviewId);
         if (!$review || $review->getTenant() !== $tenant) {
@@ -391,20 +399,32 @@ class ReviewController extends AbstractController
         ]);
     }
 
-    // ========== Helper Methods ==========
+    // ========== Security: Validated Tenant Access ==========
 
-    private function getTenantFromRequest(Request $request): ?Tenant
+    /**
+     * Validate tenant from request header with access control.
+     * 
+     * SECURITY: Uses AbstractTenantController::getValidatedTenant() which
+     * checks that the current user has membership in the requested tenant.
+     * This prevents ID spoofing attacks.
+     */
+    private function validateTenant(Request $request): Tenant|JsonResponse
     {
-        $tenantId = $request->headers->get('X-Tenant-ID');
-        if (!$tenantId) {
-            return null;
+        try {
+            $tenant = $this->getValidatedTenant($request, $this->entityManager);
+            if (!$tenant) {
+                return new JsonResponse(
+                    ['error' => 'X-Tenant-ID header is required'],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+            return $tenant;
+        } catch (AccessDeniedException $e) {
+            return new JsonResponse(
+                ['error' => 'Access to this tenant denied'],
+                Response::HTTP_FORBIDDEN
+            );
         }
-
-        return $this->entityManager->getRepository(Tenant::class)->find($tenantId);
     }
 }
-
-
-
-
 
