@@ -1,0 +1,269 @@
+{
+  "admin": {
+    "title": "Dienstleister verwalten",
+    "subtitle": "Prüfen und verwalten Sie alle BGM-Dienstleister im Marktplatz",
+    "create": "Erstellen",
+    "createDialogTitle": "Neuen Dienstleister erstellen",
+    "info": {
+      "title": "Dienstleister-Verwaltung",
+      "description": "Hier können Sie neue Dienstleister freischalten, ablehnen oder bestehende Profile verwalten. Freigeschaltete Dienstleister werden im öffentlichen Marktplatz angezeigt."
+    },
+    "stats": {
+      "total": "Gesamt",
+      "pending": "Ausstehend",
+      "approved": "Freigeschaltet",
+      "rejected": "Abgelehnt"
+    },
+    "tabs": {
+      "pending": "Ausstehend",
+      "approved": "Freigeschaltet",
+      "rejected": "Abgelehnt"
+    },
+    "table": {
+      "company": "Unternehmen",
+      "email": "E-Mail",
+      "categories": "Kategorien",
+      "status": "Status",
+      "created": "Erstellt"
+    },
+    "actions": {
+      "view": "Details",
+      "edit": "Bearbeiten",
+      "approve": "Freischalten",
+      "reject": "Ablehnen",
+      "delete": "Löschen",
+      "close": "Schließen"
+    },
+    "editDialogTitle": "{{companyName}} bearbeiten",
+    "dialogs": {
+      "reject": {
+        "title": "Dienstleister ablehnen",
+        "description": "Bitte geben Sie einen Grund für die Ablehnung von {{companyName}} an.",
+        "reasonLabel": "Ablehnungsgrund",
+        "reasonPlaceholder": "z.B. Unvollständige Informationen, nicht relevant für BGM...",
+        "cancel": "Abbrechen",
+        "confirm": "Ablehnen"
+      },
+      "delete": {
+        "title": "Dienstleister löschen",
+        "content": "Möchten Sie \"{{companyName}}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "confirm": "Löschen"
+      },
+      "details": {
+        "description": "Beschreibung",
+        "contact": "Kontakt",
+        "website": "Website",
+        "categories": "Kategorien",
+        "tags": "Tags"
+      }
+    },
+    "messages": {
+      "approved": "{{companyName}} wurde freigeschaltet.",
+      "rejected": "{{companyName}} wurde abgelehnt.",
+      "deleted": "{{companyName}} wurde gelöscht.",
+      "created": "Dienstleister wurde erfolgreich erstellt.",
+      "updated": "Dienstleister wurde erfolgreich aktualisiert.",
+      "errorApprove": "Fehler bei der Freischaltung.",
+      "errorReject": "Fehler bei der Ablehnung.",
+      "errorDelete": "Fehler beim Löschen.",
+      "errorCreate": "Erstellung fehlgeschlagen.",
+      "errorUpdate": "Aktualisierung fehlgeschlagen."
+    }
+  },
+  "registration": {
+    "steps": {
+      "companyData": "Unternehmensdaten",
+      "categoriesTags": "Kategorien & Tags",
+      "description": "Beschreibung",
+      "summary": "Fertig"
+    },
+    "form": {
+      "companyName": "Firmenname",
+      "companyNameRequired": "Firmenname ist erforderlich.",
+      "contactPerson": "Ansprechpartner",
+      "phone": "Telefon",
+      "email": "E-Mail-Adresse",
+      "emailRequired": "E-Mail ist erforderlich.",
+      "emailInvalid": "Ungültige E-Mail-Adresse.",
+      "website": "Website",
+      "websiteInvalid": "URL muss mit http:// oder https:// beginnen.",
+      "logoUrl": "Logo-URL (optional)",
+      "logoUrlDescription": "URL zu Ihrem Firmenlogo (wird im Profil angezeigt)",
+      "nationwide": "Bundesweit",
+      "remote": "Remote",
+      "categoriesRequired": "Wählen Sie mindestens eine Kategorie.",
+      "description": "Beschreibung",
+      "descriptionRequired": "Beschreibung ist erforderlich.",
+      "descriptionMinLength": "Beschreibung muss mindestens 50 Zeichen haben.",
+      "shortDescription": "Kurzbeschreibung (optional)",
+      "shortDescriptionPlaceholder": "Ein Satz, der Ihr Unternehmen beschreibt...",
+      "descriptionPlaceholder": "Beschreiben Sie Ihre BGM-Leistungen, Ihre Expertise, Ihre Zielgruppen...",
+      "descriptionTip": "💡 Tipp: Eine aussagekräftige Beschreibung hilft Unternehmen, Sie zu finden. Mindestens 50 Zeichen.",
+      "back": "Zurück",
+      "continue": "Weiter",
+      "submit": "Jetzt registrieren",
+      "submitAdmin": "Dienstleister erstellen",
+      "submitEdit": "Änderungen speichern"
+    },
+    "success": {
+      "title": "Vielen Dank! 🎉",
+      "message": "Ihre Registrierung wurde erfolgreich eingereicht. Wir prüfen Ihre Angaben und melden uns innerhalb von {hours} Stunden bei Ihnen.",
+      "confirmationEmail": "Bestätigung an: {email}",
+      "adminMessage": "Der Dienstleister wurde erfolgreich erstellt und freigeschaltet."
+    },
+    "info": {
+      "publicRegistration": "Mit dem Absenden bestätigen Sie die Richtigkeit Ihrer Angaben. Unser Team prüft Ihre Registrierung und schaltet Sie innerhalb von 24 Stunden frei.",
+      "adminCreate": "Der Dienstleister wird nach dem Erstellen automatisch freigeschaltet und ist sofort im Marktplatz sichtbar."
+    }
+  },
+  "breadcrumbs": {
+    "dashboard": "Dashboard",
+    "marketplace": "Marktplatz"
+  },
+  "catalog": {
+    "title": "BGM-Dienstleister",
+    "search": "Dienstleister suchen...",
+    "searchLabel": "Suche",
+    "info": {
+      "title": "Finden Sie den passenden Partner",
+      "subtitle": "Entdecken Sie qualifizierte Anbieter für Ihr BGM",
+      "description": "Durchsuchen Sie unseren Marktplatz nach zertifizierten BGM-Dienstleistern. Filtern Sie nach Kategorien, Leistungen und Regionen, um den idealen Partner für Ihre Gesundheitsförderung zu finden."
+    },
+    "filters": {
+      "category": "Kategorie",
+      "nationwide": "Nur bundesweit",
+      "remote": "Nur Remote",
+      "certified": "§20-zertifiziert",
+      "premium": "Nur Premium",
+      "myPartners": "Meine Partner",
+      "all": "Alle"
+    },
+    "stats": {
+      "providers": "Dienstleister",
+      "categories": "Kategorien",
+      "myPartners": "Meine Partner"
+    },
+    "empty": {
+      "title": "Keine Dienstleister gefunden",
+      "description": "Versuchen Sie es mit anderen Suchbegriffen oder Filtern."
+    },
+    "resetFilters": "Filter zurücksetzen",
+    "loading": "Lade Dienstleister...",
+    "phasesLabel": "Phasen",
+    "phases": {
+      "1": "Strukturen",
+      "2": "Analyse",
+      "3": "Planung",
+      "4": "Umsetzung",
+      "5": "Evaluation",
+      "6": "Nachhaltigkeit"
+    }
+  },
+  "provider": {
+    "status": {
+      "pending": "Ausstehend",
+      "approved": "Freigeschaltet",
+      "rejected": "Abgelehnt"
+    },
+    "management": {
+      "title": "Dienstleister-Profil erstellen",
+      "description": "Registrieren Sie sich als BGM-Dienstleister und erreichen Sie neue Kunden über unseren Marktplatz.",
+      "manageTitle": "Verwalten Sie Ihr Dienstleister-Profil und Ihre Angebote.",
+      "status": {
+        "pending": "Wartet auf Freigabe",
+        "approved": "Freigegeben",
+        "rejected": "Abgelehnt"
+      },
+      "error": "Fehler beim Laden Ihres Provider-Profils. Bitte versuchen Sie es später erneut."
+    },
+    "card": {
+      "details": "Details",
+      "inquiry": "Anfragen",
+      "nationwide": "Bundesweit",
+      "remote": "Remote",
+      "premiumPartner": "Premium Partner",
+      "myPartner": "Mein Partner",
+      "review": "Bewertung",
+      "reviews": "Bewertungen",
+      "recommendRate": "{{rate}}% würden diesen Anbieter empfehlen",
+      "removeBookmark": "Partner-Markierung entfernen",
+      "addBookmark": "Als Partner merken",
+      "removeFromCompare": "Aus Vergleich entfernen",
+      "addToCompare": "Zum Vergleich hinzufügen (max. 4)"
+    },
+    "detail": {
+      "loading": "Lade Details...",
+      "categories": "Kategorien",
+      "tags": "Leistungen & Themen",
+      "about": "Über das Unternehmen",
+      "contact": "Kontakt",
+      "offerings": "Angebote",
+      "close": "Schließen",
+      "inquiry": "Unverbindlich anfragen",
+      "website": "Website",
+      "certified": "Zertifiziert",
+      "participants": "Teilnehmer",
+      "ask": "Anfragen"
+    }
+  },
+  "inquiry": {
+    "title": "Anfrage an {{companyName}}",
+    "form": {
+      "name": "Ihr Name",
+      "nameRequired": "Bitte geben Sie Ihren Namen an.",
+      "email": "E-Mail-Adresse",
+      "emailRequired": "Bitte geben Sie Ihre E-Mail-Adresse an.",
+      "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse an.",
+      "phone": "Telefon (optional)",
+      "message": "Ihre Nachricht",
+      "messageRequired": "Bitte geben Sie eine Nachricht ein.",
+      "messageMinLength": "Die Nachricht muss mindestens 20 Zeichen lang sein.",
+      "messagePlaceholder": "Beschreiben Sie Ihr Anliegen, Ihre Anforderungen oder stellen Sie Fragen...",
+      "submit": "Anfrage senden",
+      "cancel": "Abbrechen"
+    },
+    "success": "Ihre Anfrage wurde erfolgreich gesendet!"
+  },
+  "suggestions": {
+    "title": "Empfohlene Dienstleister",
+    "subtitle": "Basierend auf Ihrer aktuellen BGM-Phase",
+    "empty": "Keine Empfehlungen verfügbar",
+    "emptyDescription": "Wir konnten keine passenden Dienstleister für Ihre aktuelle Phase finden.",
+    "viewAll": "Alle Dienstleister ansehen"
+  },
+  "partners": {
+    "title": "Meine Partner",
+    "goToMarketplace": "Zum Marktplatz",
+    "loading": "Partner werden geladen...",
+    "loadError": "Fehler beim Laden der Partner.",
+    "info": {
+      "title": "Ihre BGM-Dienstleister auf einen Blick",
+      "description": "Hier sehen Sie alle Dienstleister, mit denen Sie zusammenarbeiten oder die Sie sich gemerkt haben. Finden Sie neue Partner im Marktplatz und starten Sie eine Anfrage."
+    },
+    "empty": {
+      "title": "Noch keine Partner",
+      "description": "Finden Sie passende BGM-Dienstleister im Marktplatz und starten Sie eine Zusammenarbeit.",
+      "action": "Dienstleister finden"
+    },
+    "sections": {
+      "pendingInquiries": "Offene Anfragen",
+      "bookmarked": "Gemerkte Partner",
+      "active": "Aktive Partner"
+    },
+    "unknown": "Unbekannt",
+    "generalInquiry": "Allgemeine Anfrage",
+    "requestedOn": "Angefragt am",
+    "bookmarkedInfo": "Diese Partner haben Sie sich gemerkt. Um eine Zusammenarbeit zu starten, senden Sie eine Anfrage.",
+    "bookmarked": "Gemerkt",
+    "bookmarkedOn": "Gemerkt am",
+    "confirmPartner": "Partner bestätigen",
+    "sendInquiry": "Anfragen",
+    "contactPerson": "Ansprechpartner",
+    "contactPending": "Kontaktdaten werden noch bereitgestellt",
+    "scheduledFor": "Geplant für",
+    "startedOn": "Gestartet am",
+    "deliveredOutputs": "Gelieferte Ergebnisse"
+  }
+}
+
+

@@ -1,0 +1,269 @@
+{
+  "admin": {
+    "title": "Manage Service Providers",
+    "subtitle": "Review and manage all BGM service providers in the marketplace",
+    "create": "Create",
+    "createDialogTitle": "Create New Service Provider",
+    "info": {
+      "title": "Service Provider Management",
+      "description": "Here you can approve, reject, or manage existing provider profiles. Approved providers are displayed in the public marketplace."
+    },
+    "stats": {
+      "total": "Total",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "tabs": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "table": {
+      "company": "Company",
+      "email": "Email",
+      "categories": "Categories",
+      "status": "Status",
+      "created": "Created"
+    },
+    "actions": {
+      "view": "Details",
+      "edit": "Edit",
+      "approve": "Approve",
+      "reject": "Reject",
+      "delete": "Delete",
+      "close": "Close"
+    },
+    "editDialogTitle": "Edit {{companyName}}",
+    "dialogs": {
+      "reject": {
+        "title": "Reject Service Provider",
+        "description": "Please provide a reason for rejecting {{companyName}}.",
+        "reasonLabel": "Rejection Reason",
+        "reasonPlaceholder": "e.g. Incomplete information, not relevant for BGM...",
+        "cancel": "Cancel",
+        "confirm": "Reject"
+      },
+      "delete": {
+        "title": "Delete Service Provider",
+        "content": "Do you really want to delete \"{{companyName}}\"? This action cannot be undone.",
+        "confirm": "Delete"
+      },
+      "details": {
+        "description": "Description",
+        "contact": "Contact",
+        "website": "Website",
+        "categories": "Categories",
+        "tags": "Tags"
+      }
+    },
+    "messages": {
+      "approved": "{{companyName}} has been approved.",
+      "rejected": "{{companyName}} has been rejected.",
+      "deleted": "{{companyName}} has been deleted.",
+      "created": "Service provider has been successfully created.",
+      "updated": "Service provider has been successfully updated.",
+      "errorApprove": "Error approving provider.",
+      "errorReject": "Error rejecting provider.",
+      "errorDelete": "Error deleting provider.",
+      "errorCreate": "Failed to create provider.",
+      "errorUpdate": "Failed to update provider."
+    }
+  },
+  "registration": {
+    "steps": {
+      "companyData": "Company Data",
+      "categoriesTags": "Categories & Tags",
+      "description": "Description",
+      "summary": "Summary"
+    },
+    "form": {
+      "companyName": "Company Name",
+      "companyNameRequired": "Company name is required.",
+      "contactPerson": "Contact Person",
+      "phone": "Phone",
+      "email": "Email Address",
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Invalid email address.",
+      "website": "Website",
+      "websiteInvalid": "URL must start with http:// or https://.",
+      "logoUrl": "Logo URL (optional)",
+      "logoUrlDescription": "URL to your company logo (will be displayed in profile)",
+      "nationwide": "Nationwide",
+      "remote": "Remote",
+      "categoriesRequired": "Select at least one category.",
+      "description": "Description",
+      "descriptionRequired": "Description is required.",
+      "descriptionMinLength": "Description must be at least 50 characters.",
+      "shortDescription": "Short Description (optional)",
+      "shortDescriptionPlaceholder": "A sentence describing your company...",
+      "descriptionPlaceholder": "Describe your BGM services, your expertise, your target groups...",
+      "descriptionTip": "💡 Tip: A meaningful description helps companies find you. At least 50 characters.",
+      "back": "Back",
+      "continue": "Continue",
+      "submit": "Register Now",
+      "submitAdmin": "Create Service Provider",
+      "submitEdit": "Save Changes"
+    },
+    "success": {
+      "title": "Thank You! 🎉",
+      "message": "Your registration has been successfully submitted. We will review your information and contact you within {hours} hours.",
+      "confirmationEmail": "Confirmation to: {email}",
+      "adminMessage": "Service provider has been successfully created and approved."
+    },
+    "info": {
+      "publicRegistration": "By submitting, you confirm the accuracy of your information. Our team will review your registration and approve you within 24 hours.",
+      "adminCreate": "The service provider will be automatically approved after creation and will be immediately visible in the marketplace."
+    }
+  },
+  "breadcrumbs": {
+    "dashboard": "Dashboard",
+    "marketplace": "Marketplace"
+  },
+  "catalog": {
+    "title": "BGM Service Providers",
+    "search": "Search providers...",
+    "searchLabel": "Search",
+    "info": {
+      "title": "Find the right partner",
+      "subtitle": "Discover qualified providers for your BGM",
+      "description": "Browse our marketplace for certified BGM service providers. Filter by categories, services, and regions to find the ideal partner for your health promotion."
+    },
+    "filters": {
+      "category": "Category",
+      "nationwide": "Nationwide only",
+      "remote": "Remote only",
+      "certified": "§20 certified",
+      "premium": "Premium only",
+      "myPartners": "My Partners",
+      "all": "All"
+    },
+    "stats": {
+      "providers": "Providers",
+      "categories": "Categories",
+      "myPartners": "My Partners"
+    },
+    "empty": {
+      "title": "No Service Providers Found",
+      "description": "Try different search terms or filters."
+    },
+    "resetFilters": "Reset filters",
+    "loading": "Loading providers...",
+    "phasesLabel": "Phases",
+    "phases": {
+      "1": "Structures",
+      "2": "Analysis",
+      "3": "Planning",
+      "4": "Implementation",
+      "5": "Evaluation",
+      "6": "Sustainability"
+    }
+  },
+  "provider": {
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "management": {
+      "title": "Create Service Provider Profile",
+      "description": "Register as a BGM service provider and reach new customers through our marketplace.",
+      "manageTitle": "Manage your service provider profile and offerings.",
+      "status": {
+        "pending": "Awaiting approval",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "error": "Error loading your provider profile. Please try again later."
+    },
+    "card": {
+      "details": "Details",
+      "inquiry": "Inquire",
+      "nationwide": "Nationwide",
+      "remote": "Remote",
+      "premiumPartner": "Premium Partner",
+      "myPartner": "My Partner",
+      "review": "Review",
+      "reviews": "Reviews",
+      "recommendRate": "{{rate}}% would recommend this provider",
+      "removeBookmark": "Remove partner bookmark",
+      "addBookmark": "Bookmark as partner",
+      "removeFromCompare": "Remove from compare",
+      "addToCompare": "Add to compare (max. 4)"
+    },
+    "detail": {
+      "loading": "Loading details...",
+      "categories": "Categories",
+      "tags": "Services & Topics",
+      "about": "About the Company",
+      "contact": "Contact",
+      "offerings": "Offerings",
+      "close": "Close",
+      "inquiry": "Request Information",
+      "website": "Website",
+      "certified": "Certified",
+      "participants": "Participants",
+      "ask": "Inquire"
+    }
+  },
+  "inquiry": {
+    "title": "Inquiry to {{companyName}}",
+    "form": {
+      "name": "Your Name",
+      "nameRequired": "Please provide your name.",
+      "email": "Email Address",
+      "emailRequired": "Please provide your email address.",
+      "emailInvalid": "Please provide a valid email address.",
+      "phone": "Phone (optional)",
+      "message": "Your Message",
+      "messageRequired": "Please enter a message.",
+      "messageMinLength": "The message must be at least 20 characters long.",
+      "messagePlaceholder": "Describe your request, requirements, or ask questions...",
+      "submit": "Send Inquiry",
+      "cancel": "Cancel"
+    },
+    "success": "Your inquiry has been successfully sent!"
+  },
+  "suggestions": {
+    "title": "Recommended Service Providers",
+    "subtitle": "Based on your current BGM phase",
+    "empty": "No recommendations available",
+    "emptyDescription": "We couldn't find any matching service providers for your current phase.",
+    "viewAll": "View All Service Providers"
+  },
+  "partners": {
+    "title": "My Partners",
+    "goToMarketplace": "Go to Marketplace",
+    "loading": "Loading partners...",
+    "loadError": "Error loading partners.",
+    "info": {
+      "title": "Your BGM service providers at a glance",
+      "description": "Here you can see all providers you work with or have bookmarked. Find new partners in the marketplace and start an inquiry."
+    },
+    "empty": {
+      "title": "No partners yet",
+      "description": "Find suitable BGM service providers in the marketplace and start a collaboration.",
+      "action": "Find Providers"
+    },
+    "sections": {
+      "pendingInquiries": "Pending Inquiries",
+      "bookmarked": "Bookmarked Partners",
+      "active": "Active Partners"
+    },
+    "unknown": "Unknown",
+    "generalInquiry": "General Inquiry",
+    "requestedOn": "Requested on",
+    "bookmarkedInfo": "You have bookmarked these partners. To start a collaboration, send an inquiry.",
+    "bookmarked": "Bookmarked",
+    "bookmarkedOn": "Bookmarked on",
+    "confirmPartner": "Confirm Partner",
+    "sendInquiry": "Send Inquiry",
+    "contactPerson": "Contact Person",
+    "contactPending": "Contact details are still being provided",
+    "scheduledFor": "Scheduled for",
+    "startedOn": "Started on",
+    "deliveredOutputs": "Delivered Outputs"
+  }
+}
+
+

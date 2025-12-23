@@ -224,3 +224,4 @@ class InquiryController extends AbstractTenantController
 
 
 
+

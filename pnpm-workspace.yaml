@@ -1,0 +1,14 @@
+packages:
+  # Foundation Layer
+  - 'till-kubelke-platform-ui'
+  - 'till-kubelke-platform-foundation'
+  
+  # Module Layer
+  - 'till-kubelke-module-*'
+  
+  # App Layer
+  - 'till-kubelke-app-*'
+  
+  # Product Layer
+  - 'till-kubelke-product-*'
+

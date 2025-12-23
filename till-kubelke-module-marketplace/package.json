@@ -12,13 +12,15 @@
     "./actions/*": "./frontend/actions/*",
     "./hooks": "./frontend/hooks/index.ts",
     "./components": "./frontend/components/index.ts",
-    "./types": "./frontend/types/index.ts"
+    "./types": "./frontend/types/index.ts",
+    "./locales": "./frontend/locales/index.ts",
+    "./locales/*": "./frontend/locales/*"
   },
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@mui/material": "^7.0.0",
-    "@till-kubelke/platform-ui": "^1.0.0"
+    "@till-kubelke/platform-ui": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
@@ -33,3 +35,5 @@
   "license": "UNLICENSED",
   "private": true
 }
+
+

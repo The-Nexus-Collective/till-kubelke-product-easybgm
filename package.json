@@ -1,0 +1,19 @@
+{
+  "name": "nexus-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nexus Platform - Modular SaaS Architecture",
+  "scripts": {
+    "dev:easybgm": "pnpm --filter till-kubelke-product-easybgm-frontend dev",
+    "dev:admin": "pnpm --filter till-kubelke-product-admin-frontend dev",
+    "dev:platform-ui": "pnpm --filter @till-kubelke/platform-ui dev",
+    "build:platform-ui": "pnpm --filter @till-kubelke/platform-ui build",
+    "build:all": "pnpm -r build",
+    "install:all": "pnpm install"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  }
+}
+
