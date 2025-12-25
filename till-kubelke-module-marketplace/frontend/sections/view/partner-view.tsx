@@ -74,25 +74,25 @@ const PARTNER_TYPES = [
     icon: "solar:users-group-rounded-bold",
     title: "Beratungsunternehmen",
     description:
-      "Als BGM-Berater können Sie EasyBGM als digitale Lösung in Ihre Beratungsleistungen integrieren.",
+      "Als Berater können Sie die Plattform als digitale Lösung in Ihre Beratungsleistungen integrieren.",
   },
   {
     icon: "solar:heart-pulse-bold",
-    title: "Gesundheitsdienstleister",
+    title: "Dienstleister",
     description:
-      "Fitnessstudios, Gesundheitszentren und Physiotherapeuten können ihre Leistungen anbieten.",
+      "Spezialisierte Dienstleister können ihre Leistungen auf der Plattform anbieten.",
   },
   {
     icon: "solar:case-bold",
     title: "HR-Dienstleister",
     description:
-      "Personalberatungen und HR-Dienstleister können EasyBGM als Teil ihres Portfolios nutzen.",
+      "Personalberatungen und HR-Dienstleister können die Plattform als Teil ihres Portfolios nutzen.",
   },
   {
-    icon: "solar:meditation-round-bold",
-    title: "Coaches & Trainer",
+    icon: "solar:medal-ribbons-star-bold",
+    title: "Partner & Experten",
     description:
-      "Gesundheits-, Stress- und Ernährungscoaches finden hier ihre Zielgruppe.",
+      "Branchenexperten und Partner finden hier ihre Zielgruppe.",
   },
 ];
 
@@ -320,7 +320,7 @@ export function PartnerView() {
               color="text.secondary"
               sx={{ maxWidth: 600 }}
             >
-              Als Partner im EasyBGM-Marktplatz profitieren Sie von zahlreichen
+              Als Partner im Marktplatz profitieren Sie von zahlreichen
               Vorteilen – ohne versteckte Kosten.
             </Typography>
           </Stack>

@@ -2,7 +2,7 @@
  * Marketplace Module - Translation Resources
  * 
  * This file exports translation resources that can be dynamically loaded
- * by consuming applications (EasyBGM Frontend, Admin Frontend).
+ * by consuming applications (Product Frontends, Admin Frontend).
  * 
  * Usage in consuming app:
  * ```typescript
