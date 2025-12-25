@@ -1,0 +1,6 @@
+[submodule "till-kubelke-app-draft"]
+	path = till-kubelke-app-draft
+	url = git@github.com:The-Nexus-Collective/till-kubelke-app-draft.git
+[submodule "till-kubelke-product-draft"]
+	path = till-kubelke-product-draft
+	url = git@github.com:The-Nexus-Collective/till-kubelke-product-draft.git
