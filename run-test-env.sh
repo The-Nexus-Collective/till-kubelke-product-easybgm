@@ -3,9 +3,10 @@
 # Nexus Platform - Isolated Test Environment Script
 # ==================================================
 # Starts a completely isolated test environment on separate ports:
-#   - Test Database: Port 5433 (app_test)
+#   - Test Database: app_test (on port 5432, database name app_test)
 #   - Backend API: Port 8001 (APP_ENV=test)
-#   - Frontend: Port 8081
+#   - EasyBGM Frontend: Port 8081
+#   - Admin Frontend: Port 9001
 
 set -e
 
@@ -29,14 +30,15 @@ print_success() { echo -e "${GREEN}[TEST-ENV]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[TEST-ENV]${NC} $1"; }
 print_error() { echo -e "${RED}[TEST-ENV]${NC} $1"; }
 
-# Configuration
-TEST_DB_PORT=5433
+# Configuration - All test ports
 TEST_BACKEND_PORT=8001
-TEST_FRONTEND_PORT=8081
+TEST_EASYBGM_PORT=8081
+TEST_ADMIN_PORT=9001
 
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKEND_DIR="$BASE_DIR/till-kubelke-product-easybgm-backend"
-FRONTEND_DIR="$BASE_DIR/till-kubelke-product-easybgm-frontend"
+EASYBGM_FRONTEND_DIR="$BASE_DIR/till-kubelke-product-easybgm-frontend"
+ADMIN_FRONTEND_DIR="$BASE_DIR/till-kubelke-product-admin-frontend"
 
 # PID files
 PID_DIR="/tmp/nexus-test"
@@ -56,18 +58,28 @@ cleanup() {
         rm -f "$PID_DIR/backend.pid"
     fi
     
-    # Stop frontend
-    if [ -f "$PID_DIR/frontend.pid" ]; then
-        PID=$(cat "$PID_DIR/frontend.pid")
+    # Stop EasyBGM frontend
+    if [ -f "$PID_DIR/easybgm-frontend.pid" ]; then
+        PID=$(cat "$PID_DIR/easybgm-frontend.pid")
         if ps -p $PID > /dev/null 2>&1; then
             kill $PID 2>/dev/null || true
         fi
-        rm -f "$PID_DIR/frontend.pid"
+        rm -f "$PID_DIR/easybgm-frontend.pid"
+    fi
+    
+    # Stop Admin frontend
+    if [ -f "$PID_DIR/admin-frontend.pid" ]; then
+        PID=$(cat "$PID_DIR/admin-frontend.pid")
+        if ps -p $PID > /dev/null 2>&1; then
+            kill $PID 2>/dev/null || true
+        fi
+        rm -f "$PID_DIR/admin-frontend.pid"
     fi
     
     # Kill any remaining processes on test ports
     lsof -ti:$TEST_BACKEND_PORT | xargs kill -9 2>/dev/null || true
-    lsof -ti:$TEST_FRONTEND_PORT | xargs kill -9 2>/dev/null || true
+    lsof -ti:$TEST_EASYBGM_PORT | xargs kill -9 2>/dev/null || true
+    lsof -ti:$TEST_ADMIN_PORT | xargs kill -9 2>/dev/null || true
     
     print_success "Test environment stopped"
 }
@@ -87,7 +99,7 @@ start_test_database() {
 
 # Setup and reset test database
 setup_test_database() {
-    print_info "Setting up test database..."
+    print_info "Setting up test database schema..."
     cd "$BACKEND_DIR"
     
     # Create .env.test.local 
@@ -126,7 +138,6 @@ start_test_backend() {
     
     # Start PHP built-in server with test environment
     # IMPORTANT: Use router.php to properly propagate APP_ENV to $_SERVER/$_ENV
-    # The PHP built-in server only sets env vars via getenv(), but Symfony needs $_SERVER
     APP_ENV=test php -S 127.0.0.1:$TEST_BACKEND_PORT -t public public/router.php > "$PID_DIR/backend.log" 2>&1 &
     echo $! > "$PID_DIR/backend.pid"
     
@@ -134,38 +145,72 @@ start_test_backend() {
     print_success "Test backend ready on port $TEST_BACKEND_PORT"
 }
 
-# Start test frontend
-start_test_frontend() {
-    print_info "Starting test frontend on port $TEST_FRONTEND_PORT..."
-    cd "$FRONTEND_DIR"
+# Start EasyBGM frontend
+start_easybgm_frontend() {
+    print_info "Starting EasyBGM frontend on port $TEST_EASYBGM_PORT..."
+    cd "$EASYBGM_FRONTEND_DIR"
     
     # Check if port is in use
-    if lsof -Pi :$TEST_FRONTEND_PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
-        print_warning "Port $TEST_FRONTEND_PORT already in use, stopping..."
-        lsof -ti:$TEST_FRONTEND_PORT | xargs kill -9 2>/dev/null || true
+    if lsof -Pi :$TEST_EASYBGM_PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
+        print_warning "Port $TEST_EASYBGM_PORT already in use, stopping..."
+        lsof -ti:$TEST_EASYBGM_PORT | xargs kill -9 2>/dev/null || true
         sleep 1
     fi
     
     # Start Vite with test port
-    VITE_SERVER_URL="http://127.0.0.1:$TEST_BACKEND_PORT" yarn dev --port $TEST_FRONTEND_PORT > "$PID_DIR/frontend.log" 2>&1 &
-    echo $! > "$PID_DIR/frontend.pid"
+    VITE_SERVER_URL="http://127.0.0.1:$TEST_BACKEND_PORT" yarn dev --port $TEST_EASYBGM_PORT > "$PID_DIR/easybgm-frontend.log" 2>&1 &
+    echo $! > "$PID_DIR/easybgm-frontend.pid"
     
     # Wait for frontend
-    print_info "Waiting for test frontend..."
+    print_info "Waiting for EasyBGM frontend..."
     timeout=60
     counter=0
-    while ! curl -s "http://127.0.0.1:$TEST_FRONTEND_PORT" > /dev/null 2>&1; do
+    while ! curl -s "http://127.0.0.1:$TEST_EASYBGM_PORT" > /dev/null 2>&1; do
         sleep 2
         counter=$((counter + 2))
         if [ $counter -ge $timeout ]; then
-            print_error "Test frontend failed to start"
+            print_error "EasyBGM frontend failed to start"
             exit 1
         fi
         echo -n "."
     done
     echo ""
     
-    print_success "Test frontend ready on port $TEST_FRONTEND_PORT"
+    print_success "EasyBGM frontend ready on port $TEST_EASYBGM_PORT"
+}
+
+# Start Admin frontend
+start_admin_frontend() {
+    print_info "Starting Admin frontend on port $TEST_ADMIN_PORT..."
+    cd "$ADMIN_FRONTEND_DIR"
+    
+    # Check if port is in use
+    if lsof -Pi :$TEST_ADMIN_PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
+        print_warning "Port $TEST_ADMIN_PORT already in use, stopping..."
+        lsof -ti:$TEST_ADMIN_PORT | xargs kill -9 2>/dev/null || true
+        sleep 1
+    fi
+    
+    # Start Vite with test port
+    VITE_SERVER_URL="http://127.0.0.1:$TEST_BACKEND_PORT" npm run dev -- --port $TEST_ADMIN_PORT > "$PID_DIR/admin-frontend.log" 2>&1 &
+    echo $! > "$PID_DIR/admin-frontend.pid"
+    
+    # Wait for frontend
+    print_info "Waiting for Admin frontend..."
+    timeout=60
+    counter=0
+    while ! curl -s "http://127.0.0.1:$TEST_ADMIN_PORT" > /dev/null 2>&1; do
+        sleep 2
+        counter=$((counter + 2))
+        if [ $counter -ge $timeout ]; then
+            print_error "Admin frontend failed to start"
+            exit 1
+        fi
+        echo -n "."
+    done
+    echo ""
+    
+    print_success "Admin frontend ready on port $TEST_ADMIN_PORT"
 }
 
 # Main
@@ -179,21 +224,26 @@ main() {
     start_test_database
     setup_test_database
     start_test_backend
-    start_test_frontend
+    start_easybgm_frontend
+    start_admin_frontend
     
     echo ""
     echo -e "${GREEN}==========================================${NC}"
     echo -e "${GREEN}  Test Environment Ready!${NC}"
     echo -e "${GREEN}==========================================${NC}"
     echo ""
-    print_info "Test Backend:   http://127.0.0.1:$TEST_BACKEND_PORT"
-    print_info "Test Frontend:  http://127.0.0.1:$TEST_FRONTEND_PORT"
+    print_info "Test Backend:       http://127.0.0.1:$TEST_BACKEND_PORT"
+    print_info "EasyBGM Frontend:   http://127.0.0.1:$TEST_EASYBGM_PORT"
+    print_info "Admin Frontend:     http://127.0.0.1:$TEST_ADMIN_PORT"
     echo ""
-    print_info "Run E2E tests: cd till-kubelke-product-easybgm-frontend && yarn test:e2e"
+    print_info "Run E2E tests:"
+    print_info "  EasyBGM: cd till-kubelke-product-easybgm-frontend && yarn test:e2e"
+    print_info "  Admin:   cd till-kubelke-product-admin-frontend && npx playwright test"
+    print_info ""
     print_info "Press Ctrl+C to stop"
     echo ""
     
-    tail -f "$PID_DIR/backend.log" "$PID_DIR/frontend.log" 2>/dev/null &
+    tail -f "$PID_DIR/backend.log" "$PID_DIR/easybgm-frontend.log" "$PID_DIR/admin-frontend.log" 2>/dev/null &
     wait
 }
 
