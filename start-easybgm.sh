@@ -14,3 +14,5 @@ fi
 
 exec "$EASYBGM_DIR/run.sh" "${@:-start-all}"
 
+
+

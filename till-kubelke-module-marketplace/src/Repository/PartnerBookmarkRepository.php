@@ -68,3 +68,5 @@ class PartnerBookmarkRepository extends ServiceEntityRepository
 
 
 
+
+

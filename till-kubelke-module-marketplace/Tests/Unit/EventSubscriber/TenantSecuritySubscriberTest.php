@@ -4,6 +4,7 @@ namespace TillKubelke\ModuleMarketplace\Tests\Unit\EventSubscriber;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -22,6 +23,7 @@ use TillKubelke\PlatformFoundation\Tenant\Entity\UserTenant;
  * 
  * SECURITY TESTS: These tests ensure tenant ID spoofing is blocked.
  */
+#[AllowMockObjectsWithoutExpectations]
 class TenantSecuritySubscriberTest extends TestCase
 {
     private EntityManagerInterface&MockObject $entityManager;

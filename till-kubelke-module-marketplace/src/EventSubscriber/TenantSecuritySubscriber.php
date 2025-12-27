@@ -42,6 +42,8 @@ class TenantSecuritySubscriber implements EventSubscriberInterface
      */
     private const EXEMPT_ROUTE_PREFIXES = [
         '/api/auth/',           // Authentication
+        '/api/admin/',          // Admin endpoints (have their own auth)
+        '/api/system/',         // System config endpoints
         '/api/marketplace/catalog',  // Public catalog
         '/api/marketplace/reviews/provider/',  // Public provider reviews
         '/api/marketplace/reviews/stats',  // Public stats
@@ -150,4 +152,5 @@ class TenantSecuritySubscriber implements EventSubscriberInterface
         ]);
     }
 }
+
 

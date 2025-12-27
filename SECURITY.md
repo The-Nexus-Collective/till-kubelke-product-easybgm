@@ -98,7 +98,9 @@ When reporting a vulnerability, please include:
 ### Authorization
 - Role-based access control
 - Tenant-level permissions
-- Super-Admin bypass is explicitly checked
+- **Admin role via Impersonate only**: Admin access (formerly Super-Admin) is ONLY granted via
+  Impersonate from the Admin Portal. Direct Super-Admin login to EasyBGM is blocked.
+- Admin role grants elevated feature access but NOT security bypass
 
 ### Data Protection
 - API keys encrypted with AES-256-GCM
@@ -117,6 +119,18 @@ This project has undergone security reviews:
 
 - **December 2025:** Multi-tenancy hardening, ID-spoofing prevention
 - **December 2025:** Open Source readiness review
+- **December 2025:** Super-Admin removal from EasyBGM - Admin access now only via Impersonate
+
+### Super-Admin to Admin Refactoring (December 2025)
+
+A major security improvement was implemented to restrict Super-Admin access:
+
+1. **Super-Admins cannot directly login to EasyBGM** - They must use Impersonate from Admin Portal
+2. **Admin role is virtual** - Never stored in database, only granted via JWT claims during Impersonate
+3. **Admin has feature rights but no security bypass** - Cannot assign Admin role, must follow tenant isolation
+4. **AdminDetectionService** - New service to detect Impersonate sessions via JWT claims
+
+Audit script: `./scripts/security/audit-super-admin-removal.sh`
 
 ## Acknowledgments
 
@@ -125,4 +139,5 @@ We thank all security researchers who responsibly disclose vulnerabilities.
 ---
 
 *Last updated: December 2025*
+
 
